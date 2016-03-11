@@ -24,7 +24,7 @@ export class FileStoreFileSystem implements IFileStore {
     
     async create(asset: IFile, stream: Readable): Promise<IFile> {
         
-        
+        let bn = Path.dirname(asset.path);
         
     }
     

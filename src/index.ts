@@ -9,6 +9,9 @@ import {randomName, getFileStats, getMimeType} from './utils';
 import * as Path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
+import * as Debug from 'debug';
+
+const debug = Debug('assets');
 
 export enum Hook {
     BeforeCreate,
@@ -80,22 +83,19 @@ export class Assets extends EventEmitter {
 
         let tmpFile;
         
-        const clean = () => {
-            if (tmpFile) fs.unlink(tmpFile);
-        }
+        const clean = () => {  if (tmpFile) fs.unlink(tmpFile); };
+        
         // If mime or size isnt provided, we have to get it
         // the hard way
         if (!options.mime || !options.size) {
-            let rnd = await randomName(path);
-            tmpFile = Path.join(os.tmpdir(), rnd);
-            await this._writeFile(stream, tmpFile);
+            
+            tmpFile = this._createTemp(stream, path);
 
             let stats = await getFileStats(tmpFile);
             let mime = getMimeType(tmpFile);
 
             options.mime = mime;
-            options.size = stats.size
-            
+            options.size = stats.size 
         }
 
         let asset = new Asset({
@@ -109,9 +109,7 @@ export class Assets extends EventEmitter {
         var self = this;
         this._runHook(Hook.BeforeCreate, asset, async function (): Promise<Readable> {
             if (!tmpFile) {
-                let rnd = await randomName(path);
-                tmpFile = Path.join(os.tmpdir(), rnd);
-                await self._writeFile(stream, tmpFile);
+                tmpFile = self._createTemp(stream, path);
             }
             return fs.createReadStream(tmpFile);
         });
@@ -199,6 +197,13 @@ export class Assets extends EventEmitter {
             this._hooks.get(hook).push(fn[i]);    
         }
         
+    }
+    
+    private async _createTemp (stream: Readable, path: string): Promise<string> {
+        let rnd = await randomName(path);
+        let tmpFile = Path.join(os.tmpdir(), rnd);
+        await this._writeFile(stream, tmpFile);
+        return tmpFile
     }
 
     private async _runHook(hook: Hook, asset: Asset, fn?:() => Promise<Readable>): Promise<void> {
