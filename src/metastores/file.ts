@@ -4,7 +4,9 @@ import * as fs from 'mz/fs';
 const mkdirp = require('mkdirp-promise');
 import {IMetaStore, IFile, IListOptions, IFindOptions, ICreateOptions} from '../interface';
 import {registerMetaStore} from '../repository'
+import * as Debug from 'debug';
 
+const debug = Debug('assets:metastore:filesystem')
 
 export interface FileMetaStoreOptions {
     path?: string;
@@ -32,6 +34,7 @@ export class FileMetaStore implements IMetaStore {
     async create(asset:IFile, options:ICreateOptions={}): Promise<IFile> {
         
         asset.id = (++this._currentID) + "";
+        debug('create asset "%s", id: "%s"', asset.path, asset.id)
         this.files[asset.id] = asset;
         
         await this._save();
@@ -40,7 +43,9 @@ export class FileMetaStore implements IMetaStore {
     }
     
     async remove(asset:IFile): Promise<IFile> {
-        
+        debug('remove asset "%s", id: "%s"', asset.path, asset.id)
+        delete this.files[asset.id];
+        await this._save()
         return asset;
     }
     

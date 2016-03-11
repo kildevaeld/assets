@@ -112,6 +112,21 @@ export class Assets extends EventEmitter {
     canThumbnail (asset:Asset): boolean {
         return this.thumbnailer.canThumbnail(asset.mime);
     }
+    
+    async createFromPath(path: string, dest: string, options: AssetCreateOptions = { skipMeta: false }) {
+        
+        let stat = await getFileStats(path);
+        
+        if (!stat.isFile()) throw new Error('not a file');
+        
+        let reader = fs.createReadStream(path);
+        
+        options.size = stat.size;
+        options.mime = options.mime||getMimeType(path);
+        
+        return await this.create(reader, dest, options);
+        
+    }
 
     async create(stream: Readable, path: string, options: AssetCreateOptions = { skipMeta: false }): Promise<IFile> {
 
@@ -192,6 +207,8 @@ export class Assets extends EventEmitter {
         }
         return <Asset>info[0];
     }
+    
+   
 
     async remove(asset: Asset): Promise<void> {
 
