@@ -1,5 +1,6 @@
 import * as Path from 'path';
 import * as fs from 'mz/fs';
+import {Readable} from 'stream';
 
 const crypto = require('mz/crypto');
 const Mime = require('mime');
@@ -20,4 +21,16 @@ export function getFileStats(path: string): Promise<fs.Stats> {
 
 export function getMimeType(path: string): string {
     return Mime.lookup(path);
+}
+
+export function writeStream(stream:Readable, path: string): Promise<void> {
+    return new Promise<void>(function(resolve, reject) {
+        var ws = fs.createWriteStream(path);
+        ws.on('finish', resolve)
+        .on('error', reject);
+
+        stream.on('error', reject);
+
+        stream.pipe(ws);
+    });
 }

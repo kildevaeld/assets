@@ -1,5 +1,6 @@
 import { Readable } from 'stream';
 export interface IFile {
+    /** File id */
     id: string;
     name: string;
     filename: string;

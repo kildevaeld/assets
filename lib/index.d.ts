@@ -35,6 +35,7 @@ export declare class Assets extends EventEmitter {
     list(options?: IListOptions): Promise<Asset[]>;
     stream(asset: IFile): Promise<Readable>;
     registerHook(hook: Hook, ...fn: HookFunc[]): void;
+    private _createTemp(stream, path);
     private _runHook(hook, asset, fn?);
     private _writeFile(stream, path);
 }

@@ -89,7 +89,7 @@ export class Assets extends EventEmitter {
         // the hard way
         if (!options.mime || !options.size) {
             
-            tmpFile = this._createTemp(stream, path);
+            tmpFile = await this._createTemp(stream, path);
 
             let stats = await getFileStats(tmpFile);
             let mime = getMimeType(tmpFile);
@@ -100,7 +100,7 @@ export class Assets extends EventEmitter {
 
         let asset = new Asset({
             name: options.name,
-            path: Path.dirname(path),
+            path: path, //Path.dirname(path),
             filename: Path.basename(path),
             mime: options.mime,
             size: options.size
@@ -109,7 +109,7 @@ export class Assets extends EventEmitter {
         var self = this;
         this._runHook(Hook.BeforeCreate, asset, async function (): Promise<Readable> {
             if (!tmpFile) {
-                tmpFile = self._createTemp(stream, path);
+                tmpFile = await self._createTemp(stream, path);
             }
             return fs.createReadStream(tmpFile);
         });

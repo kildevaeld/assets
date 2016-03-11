@@ -17,7 +17,7 @@
     "src/interface.ts",
     "src/repository.ts",
     "src/utils.ts",
-    "src/filestores/file.ts",
-    "src/metastores/file.ts"
+    "src/metastores/file.ts",
+    "src/filestores/file.ts"
   ]
 }

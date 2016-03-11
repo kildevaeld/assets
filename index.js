@@ -10,13 +10,14 @@ let assets = new asset.Assets({
 })
 
 assets.initialize().then(() => {
-    console.log('initialized');
+    
+    
     let stream = fs.createReadStream('./index.js');
-    assets.list()
+    assets.create(stream, "testmig/index.js")
     .then( a => {
         console.log(a)
     }).catch( e => {
-        console.log(e);
+        console.log(e.stack);
     })
     
 }).catch( e => {

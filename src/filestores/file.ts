@@ -3,7 +3,7 @@ import * as Path from 'path';
 
 import {IFileStore, IFile} from '../interface';
 import {registerFileStore} from '../repository';
-import {getFileStats} from '../utils';
+import {getFileStats, writeStream} from '../utils';
 
 const fs = require('mz/fs'),
     mkdirp = require('mkdirp-promise');
@@ -18,14 +18,28 @@ export class FileStoreFileSystem implements IFileStore {
         
     }
     
+    
     async initialize(): Promise<void> {
         await this._initPath(this.opts.path);
     }
     
     async create(asset: IFile, stream: Readable): Promise<IFile> {
+        let bn = Path.dirname(asset.path),
+            bnF = this._getPath(bn);
+        try {
+            let stats = await getFileStats(bnF);
+            if (stats.isFile()) {
+                throw new Error("A files called " + bn + " already exists")
+            }
+        } catch (e) {
+            await mkdirp(bnF);
+        }
         
-        let bn = Path.dirname(asset.path);
+        let fp = this._getPath(asset.path);
         
+        await writeStream(stream, fp);
+         
+        return asset;
     }
     
     async remove(asset: IFile): Promise<IFile> {
@@ -44,8 +58,25 @@ export class FileStoreFileSystem implements IFileStore {
         return asset;
     }
     
-    stream(asset: IFile): Promise<Readable> {}
-    has(asset: IFile): Promise<boolean> {}
+    async stream(asset: IFile): Promise<Readable> {
+        if (!(await this.has(asset))) {
+            return null; 
+        }
+        let fp = this._getPath(asset.path);
+        
+        return fs.createReadStream(fp);
+    }
+    async has(asset: IFile): Promise<boolean> {
+        let path = this._getPath(asset.path);
+        
+        try {
+            let stats = await getFileStats(path);
+            return stats.isFile();       
+        } catch (e) {
+            return false;
+        }
+        
+    }
     
     private _getPath(path: string): string {
         return Path.join(this.opts.path, path);

@@ -14,7 +14,6 @@ export interface IFile {
     meta: {[key: string]: any};
     toJSON(): any;
 }
-
 export interface IListOptions {
     offset?: number;
     limit?: number;
