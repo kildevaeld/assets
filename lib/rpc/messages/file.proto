@@ -42,7 +42,6 @@ message FileInfo {
     string path = 4;
     string mime = 5;
     uint64 size = 6;
-    
 }
 
 message FileChunk {

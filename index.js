@@ -17,6 +17,19 @@ assets.registerHook(asset.Hook.Create, (asset) => {
     console.log('after hook')
 })
 
+
+
+var r = require('./lib/rpc');
+
+var server = new r.RpcServer(assets);
+
+server.initialize().then( e => {
+    server.listen();
+}).catch(e => {
+    console.log(e);
+})
+
+
 assets.initialize().then(() => {
     
     /*let stream = fs.createReadStream('./distortion.jpg');
