@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package messages;
+
+service FileService {
+    rpc List(ListRequest) returns (stream FileInfo) {};
+    rpc CreateRequest(CreateRequest) returns (CreateRequestResponse) {};
+    rpc Create(stream FileChunk) returns (CreateResponse) {}; 
+}
+
+
+message ListRequest {
+    
+}
+
+message CreateRequest {
+    
+}
+
+message CreateRequestResponse {
+    
+}
+
+message CreateResponse {
+    
+}
+
+message FileInfo {
+    
+}
+
+message FileChunk {
+    
+}

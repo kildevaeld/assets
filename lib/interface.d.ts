@@ -2,7 +2,7 @@ import { Readable } from 'stream';
 export interface IFile {
     /** File id */
     id: string;
-    name: string;
+    name?: string;
     filename: string;
     path: string;
     mime: string;

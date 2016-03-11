@@ -16,8 +16,12 @@
     "src/index.ts",
     "src/interface.ts",
     "src/repository.ts",
+    "src/thumbnailer.ts",
     "src/utils.ts",
+    "src/filestores/file.ts",
     "src/metastores/file.ts",
-    "src/filestores/file.ts"
+    "src/generators/generators.ts",
+    "src/generators/index.ts",
+    "src/rpc/index.ts"
   ]
 }

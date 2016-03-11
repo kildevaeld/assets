@@ -1,5 +1,6 @@
 import * as Path from 'path';
 import * as fs from 'mz/fs';
+import * as os from 'os';
 import {Readable} from 'stream';
 
 const crypto = require('mz/crypto');
@@ -13,6 +14,13 @@ export async function randomName(name?: string, len: number = 32, algo: string =
     if (name) rndString += Path.extname(name);
 
     return rndString;
+}
+
+export async function tmpFile(name?: string): Promise<string> {
+    let tmpDir = os.tmpdir();
+    let rname = await randomName(name);
+    
+    return Path.join(tmpDir, rname);
 }
 
 export function getFileStats(path: string): Promise<fs.Stats> {

@@ -9,15 +9,32 @@ let assets = new asset.Assets({
     fileStore: 'file'
 })
 
+assets.registerHook(asset.Hook.BeforeCreate, (asset, getStream) => {
+    console.log('before hook');
+})
+
+assets.registerHook(asset.Hook.Create, (asset) => {
+    console.log('after hook')
+})
+
 assets.initialize().then(() => {
     
-    
-    let stream = fs.createReadStream('./index.js');
-    assets.create(stream, "testmig/index.js")
+    /*let stream = fs.createReadStream('./distortion.jpg');
+    return assets.create(stream, "images/distortion.jpg")
     .then( a => {
         console.log(a)
-    }).catch( e => {
+        
+        return assets.thumbnail(a).then( s => {
+            let ws = fs.createWriteStream('distortion.thumbnail.png')
+            s.pipe(ws)
+        }) 
+        
+    })/*.catch( e => {
         console.log(e.stack);
+    })*/
+    
+    return assets.list({limit: 1, offset: 10}).then( e => {
+        console.log(e)
     })
     
 }).catch( e => {
