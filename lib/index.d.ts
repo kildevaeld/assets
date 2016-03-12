@@ -17,8 +17,8 @@ export interface MimeFunc {
     (asset: Asset, fn?: () => Promise<Readable>): Promise<void>;
 }
 export interface AssetsOptions {
-    metaStore: string;
-    dataStore: string;
+    metaStore?: string | IMetaStore;
+    dataStore?: string | IFileStore;
     dataStoreOptions?: any;
     metaStoreOptions?: any;
 }
@@ -42,7 +42,16 @@ export declare class Assets extends EventEmitter {
     canThumbnail(asset: Asset): boolean;
     createFromPath(path: string, dest: string, options?: AssetCreateOptions): Promise<IFile>;
     create(stream: Readable, path: string, options?: AssetCreateOptions): Promise<IFile>;
+    /** Get an asset by id
+     * @param {string} id The id
+     * @return Promise<Asset>
+     */
     getById(id: string): Promise<Asset>;
+    /**
+     * Get an asset by full path
+     * @param {string} path The full path to the file
+     * @return Promise<Asset>
+     */
     getByPath(path: string): Promise<Asset>;
     remove(asset: Asset): Promise<void>;
     list(options?: IListOptions): Promise<Asset[]>;

@@ -70,7 +70,7 @@ export class FileMetaStore implements IMetaStore {
         let reg = new RegExp(options.path, 'i');
         let out = [];
         for (let key in this.files) {
-            if (reg.test(this.files[key].path)) {
+            if (reg.test(Path.join(this.files[key].path, this.files[key].filename))) {
                 out.push(this.files[key]);
             }
         }

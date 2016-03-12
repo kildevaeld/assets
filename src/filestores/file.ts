@@ -24,18 +24,18 @@ export class FileStoreFileSystem implements IFileStore {
     }
     
     async create(asset: IFile, stream: Readable): Promise<IFile> {
-        let bn = Path.dirname(asset.path),
-            bnF = this._getPath(bn);
+        //let bn = Path.dirname(asset.path),
+        let bnF = this._getPath(asset.path);
         try {
             let stats = await getFileStats(bnF);
             if (stats.isFile()) {
-                throw new Error("A files called " + bn + " already exists")
+                throw new Error("A files called " + asset.path + " already exists")
             }
         } catch (e) {
             await mkdirp(bnF);
         }
         
-        let fp = this._getPath(asset.path);
+        let fp = this._getPath(asset);
         
         await writeStream(stream, fp);
          
@@ -44,7 +44,7 @@ export class FileStoreFileSystem implements IFileStore {
     
     async remove(asset: IFile): Promise<IFile> {
         
-        let path = this._getPath(asset.path);
+        let path = this._getPath(asset);
         
         try {
             let stats = await getFileStats(path);
@@ -62,12 +62,12 @@ export class FileStoreFileSystem implements IFileStore {
         if (!(await this.has(asset))) {
             return null; 
         }
-        let fp = this._getPath(asset.path);
+        let fp = this._getPath(asset);
         
         return fs.createReadStream(fp);
     }
     async has(asset: IFile): Promise<boolean> {
-        let path = this._getPath(asset.path);
+        let path = this._getPath(asset);
         
         try {
             let stats = await getFileStats(path);
@@ -78,8 +78,12 @@ export class FileStoreFileSystem implements IFileStore {
         
     }
     
-    private _getPath(path: string): string {
-        return Path.join(this.opts.path, path);
+    private _getPath(asset: IFile|string): string {
+        if (typeof asset === 'string') {
+            return Path.join(this.opts.path, asset);
+        }
+        let a = <IFile>asset;
+        return Path.join(this.opts.path, a.path, a.filename);
     }
     
     private async _initPath (path:string): Promise<void> {

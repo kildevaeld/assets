@@ -22,6 +22,10 @@ export enum Hook {
     Remove
 }
 
+function isString(a:any): a is String {
+    return typeof a === 'string';
+}
+
 export interface HookFunc {
     (asset: Asset, fn?: () => Promise<Readable>): Promise<void>;
 }
@@ -36,8 +40,8 @@ interface MimeMap {
 }
 
 export interface AssetsOptions {
-    metaStore: string;
-    dataStore: string;
+    metaStore?: string|IMetaStore;
+    dataStore?: string|IFileStore;
     dataStoreOptions?: any;
     metaStoreOptions?: any;
 }
@@ -64,6 +68,7 @@ export class Assets extends EventEmitter {
      
     private _hooks: Map<Hook, HookFunc[]>;
     private _mimeHandlers: MimeMap[];
+    
     constructor(options: AssetsOptions) {
         super();
 
@@ -80,11 +85,22 @@ export class Assets extends EventEmitter {
         if (!options.dataStore) {
             options.dataStore = 'file';
         }
+        
+        let meta: IMetaStore, file: IFileStore;
+        if (isString(options.metaStore)) {
+            meta = getMetaStore(<string>options.metaStore, options.metaStoreOptions);               
+        } else {
+            meta = <IMetaStore>options.metaStore;
+        }
 
-        let meta = getMetaStore(options.metaStore, options.metaStoreOptions);
-        let file = getFileStore(options.dataStore, options.dataStoreOptions);
+        if (isString(options.dataStore)) {
+            file = getFileStore(<string>options.dataStore, options.dataStoreOptions);
+        } else {
+            file = <IFileStore>options.dataStore;
+        }
 
         if (!meta || !file) {
+            
             throw new Error("no file or meta store");
         }
         this.thumbnailer = new Thumbnailer();
@@ -149,7 +165,7 @@ export class Assets extends EventEmitter {
 
         let asset = new Asset({
             name: options.name,
-            path: path, //Path.dirname(path),
+            path: Path.dirname(path),
             filename: Path.basename(path),
             mime: options.mime,
             size: options.size
@@ -186,6 +202,10 @@ export class Assets extends EventEmitter {
         return asset;
     }
 
+    /** Get an asset by id
+     * @param {string} id The id
+     * @return Promise<Asset>
+     */
     async getById(id: string): Promise<Asset> {
         let info = await this.metaStore.get(id);
         if (!(info instanceof Asset)) {
@@ -194,6 +214,11 @@ export class Assets extends EventEmitter {
         return <Asset>info;
     }
 
+    /**
+     * Get an asset by full path
+     * @param {string} path The full path to the file
+     * @return Promise<Asset>
+     */
     async getByPath(path: string): Promise<Asset> {
 
         let info = await this.metaStore.find({

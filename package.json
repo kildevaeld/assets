@@ -19,6 +19,7 @@
     "requiredir": "^1.0.7"
   },
   "dependencies": {
+    "commander": "^2.9.0",
     "debug": "^2.2.0",
     "etag": "^1.7.0",
     "formidable": "^1.0.17",

@@ -2,7 +2,6 @@
 import {Readable, Writable} from 'stream';
 
 
-
 export interface IFile {
     /** File id */
     id: string;
@@ -12,7 +11,9 @@ export interface IFile {
     mime: string;
     size: number;
     meta: {[key: string]: any};
-    toJSON(): any;
+    ctime: number;
+    mtime: number;
+    hidden: boolean;
 }
 export interface IListOptions {
     offset?: number;

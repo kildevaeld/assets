@@ -11,6 +11,6 @@ export declare class FileStoreFileSystem implements IFileStore {
     remove(asset: IFile): Promise<IFile>;
     stream(asset: IFile): Promise<Readable>;
     has(asset: IFile): Promise<boolean>;
-    private _getPath(path);
+    private _getPath(asset);
     private _initPath(path);
 }

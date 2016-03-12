@@ -42,3 +42,11 @@ export function writeStream(stream:Readable, path: string): Promise<void> {
         stream.pipe(ws);
     });
 }
+
+export function pick(obj: any, args:string[]): any {
+    let out = {};
+    for (let i = 0, ii = args.length; i < ii; i++ ) {
+        if (obj[args[i]]) out[args[i]] = obj[args[i]];
+    }
+    return out;
+}

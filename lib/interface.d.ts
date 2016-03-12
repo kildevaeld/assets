@@ -10,7 +10,9 @@ export interface IFile {
     meta: {
         [key: string]: any;
     };
-    toJSON(): any;
+    ctime: number;
+    mtime: number;
+    hidden: boolean;
 }
 export interface IListOptions {
     offset?: number;

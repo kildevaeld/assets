@@ -6,9 +6,8 @@ import * as formidable from 'formidable';
 
 import {Assets, AssetCreateOptions} from '../index';
 
-const debug = Debug('assets:http');
-
-const pathToRegexp = require('path-to-regexp')
+const debug = Debug('assets:http'),
+    pathToRegexp = require('path-to-regexp')
 
 function toBoolean(str: string): boolean {
     return !!~['true', 'TRUE','t', 'y','j','yes'].indexOf(str)
@@ -96,8 +95,8 @@ export class AssetsRouter {
         
         debug('trying route: "%s"...', url);
         
-        let route: Route;
-        let match: string[];
+        let route: Route, match: string[];
+        
         for (let i = 0, ii = this._routes.length; i < ii; i++) {
             route = this._routes[i];
             match = route.reg.exec(url);
@@ -111,7 +110,6 @@ export class AssetsRouter {
         debug('found route: "%s"', route.fn);
         return this[route.fn].call(this, req, res, match.length == 2 ? match[1] : undefined)
         .catch( e => {
-            console.error('Got error', e);
             this._writeJSON(res, e, e.code||500);
         })
     
@@ -342,21 +340,3 @@ export class AssetsRouter {
     
 } 
 
-require('../metastores/file');
-require('../filestores/file');
-
-let asset = new Assets({
-    metaStore: 'file',
-    dataStore: 'file'
-});
-
-
-asset.initialize().then( () => {
-    let router = new AssetsRouter(asset);
-
-let server = http.createServer((req, res) => {
-    router.middleware(req, res)
-})
-
-server.listen(3000)
-})
