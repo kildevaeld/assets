@@ -21,6 +21,7 @@
     "src/thumbnailer.ts",
     "src/utils.ts",
     "src/filestores/file.ts",
+    "src/filestores/s3.ts",
     "src/cli/index.ts",
     "src/cli/server.ts",
     "src/generators/generators.ts",

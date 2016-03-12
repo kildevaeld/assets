@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "assets": "bin/assets"
+  },
   "author": "",
   "license": "ISC",
   "devDependencies": {
@@ -25,6 +28,7 @@
     "formidable": "^1.0.17",
     "gm": "^1.21.1",
     "grpc": "^0.13.0",
+    "knox": "^0.9.2",
     "mime-types": "^2.1.10",
     "mkdirp-promise": "^1.0.3",
     "mz": "^2.3.1",

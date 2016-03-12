@@ -38,7 +38,6 @@ export function writeStream(stream:Readable, path: string): Promise<void> {
         .on('error', reject);
 
         stream.on('error', reject);
-
         stream.pipe(ws);
     });
 }
