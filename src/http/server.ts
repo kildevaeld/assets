@@ -10,6 +10,10 @@ const debug = Debug('assets:http');
 
 const pathToRegexp = require('path-to-regexp')
 
+function toBoolean(str: string): boolean {
+    return !!~['true', 'TRUE','t', 'y','j','yes'].indexOf(str)
+}
+
 export interface AssetsRouterOptions {
     prefix?: string
 }
@@ -73,6 +77,14 @@ export class AssetsRouter {
 
     }
     
+    async middlewareKoa2 (ctx, next): Promise<void> {
+        await this.middleware(ctx.req, ctx.res, next);
+    }
+    
+    * middlewareKoa (ctx, next) {
+        yield ctx.middleware(ctx.req, ctx.res, next);
+    }
+    
     middleware (req:http.IncomingMessage, res:http.ServerResponse, next?): Promise<any> {
         let {method, url} = req;
         
@@ -104,8 +116,6 @@ export class AssetsRouter {
         })
     
     }
-    
-    
     
     async create(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
         
@@ -165,7 +175,7 @@ export class AssetsRouter {
         
         if (req.method === 'DELETE') throw new HttpError("No id");
         
-        let page = 0, limit = 1000;
+        let page = 1, limit = 1000;
         if (query.page) {
             let i = parseInt(query.page);
             if (!isNaN(i)) page = i;
@@ -176,14 +186,17 @@ export class AssetsRouter {
             if (!isNaN(i)) limit = i;
         }
         
+        if (page <= 0) page = 1;
+        
         let result;
         if (query.q) {
             
-            
+            result = {}
             
         } else {
             let count = await this._assets.metaStore.count();
-            let offset = Math.ceil((count / limit)) * page;
+            let pages = Math.ceil(count / limit);
+            let offset = limit * (page - 1);
             
             if (offset > count) {
                 result = [];
@@ -194,6 +207,16 @@ export class AssetsRouter {
                 });
             }
             
+            let links: any = {
+                first: 1,
+                last: pages
+            };
+            
+            if (page > 1) links.prev = page - 1;
+            if (page < pages) links.next = page + 1;
+            
+            this._writeLinksHeader(req, res, links);
+        
         }
             
         await this._writeJSON(res, result);
@@ -201,6 +224,39 @@ export class AssetsRouter {
     }
     
     async getResource (req: http.IncomingMessage, res: http.ServerResponse, path: string): Promise<void> {
+        
+        let query = this._getQuery(req.url);
+        
+        if (path[0] !== '/') path = "/" + path;
+        
+        let asset = await this._assets.getByPath(path);
+        
+        if (!asset) throw new HttpError("Not Found", 404);
+        
+        if (toBoolean(query.meta)) {
+            return await this._writeJSON(res, asset, 200);
+        }
+        
+        res.setHeader('Content-Type', asset.mime);
+        res.setHeader('Content-Length', asset.size + "");
+        
+        if (toBoolean(query.download)) {
+            res.setHeader('Content-Disposition', 'attachment; filename=' + asset.filename);
+        }
+        
+        let outStream;
+        if (toBoolean(query.thumbnail)) {
+            res.setHeader('Content-Type', 'image/png');
+            outStream = await this._assets.thumbnail(asset);
+            if (outStream == null) {
+                throw new HttpError('Cannot generate thumbnail for mimetype', 300);
+            }
+        } else {
+             outStream = await this._assets.stream(asset);
+        }
+        
+        res.writeHead(200);
+        outStream.pipe(res);
         
     }
 
@@ -269,6 +325,19 @@ export class AssetsRouter {
            });
           
         });
+    }
+    
+    private _writeLinksHeader(req: http.IncomingMessage, res: http.ServerResponse, links: {prev?:number, next?:number, last?:number, first?:number}) {
+        
+        let url = req.url;
+        
+        url = req.headers['host'] + url +  (url.indexOf('?') == -1 ? "?" : "&") + 'page=';
+       
+        url = "http://" + url
+        
+        res.setHeader('Link', Object.keys(links).map(function(rel){
+            return '<' + url + links[rel] + '>; rel="' + rel + '"';
+        }).join(', '));   
     }
     
 } 

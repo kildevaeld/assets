@@ -8,6 +8,8 @@ export declare class AssetsRouter {
     private opts;
     private _routes;
     constructor(_assets: Assets, opts?: AssetsRouterOptions);
+    middlewareKoa2(ctx: any, next: any): Promise<void>;
+    middlewareKoa(ctx: any, next: any): IterableIterator<any>;
     middleware(req: http.IncomingMessage, res: http.ServerResponse, next?: any): Promise<any>;
     create(req: http.IncomingMessage, res: http.ServerResponse): Promise<void>;
     list(req: http.IncomingMessage, res: http.ServerResponse): Promise<void>;
@@ -17,4 +19,5 @@ export declare class AssetsRouter {
     private _getQuery(url);
     private _readBody(req);
     private _readForm(req);
+    private _writeLinksHeader(req, res, links);
 }

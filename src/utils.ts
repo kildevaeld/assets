@@ -4,7 +4,7 @@ import * as os from 'os';
 import {Readable} from 'stream';
 
 const crypto = require('mz/crypto');
-const Mime = require('mime');
+const Mime = require('mime-types');
 
 export async function randomName(name?: string, len: number = 32, algo: string = 'sha1'): Promise<string> {
 
