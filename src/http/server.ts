@@ -69,10 +69,11 @@ export class AssetsRouter {
             method: ['POST'],
             reg: pathToRegexp(prefix),
             fn: 'create'
-        }/*, {
+        }, {
             method: ['DELETE'],
-            reg: pathToRegexp(prefix)
-        }*/];
+            reg: pathToRegexp(prefix + '*'),
+            fn: 'removeResource'
+        }];
 
     }
     
@@ -106,9 +107,12 @@ export class AssetsRouter {
             route = null;
         }
         
-        if (route === null) return next ? next() : void 0;
+        if (route === null) {
+            debug('route no match');
+            return next ? next() : void 0;
+        }
         debug('found route: "%s"', route.fn);
-        return this[route.fn].call(this, req, res, match.length == 2 ? match[1] : undefined)
+        return this[route.fn].call(this, req, res, match.length == 2 ? decodeURIComponent(match[1]) : undefined)
         .catch( e => {
             this._writeJSON(res, e, e.code||500);
         })
@@ -260,6 +264,19 @@ export class AssetsRouter {
 
     
     async removeResource(req: http.IncomingMessage, res: http.ServerResponse, path: string): Promise<void> {
+        let query = this._getQuery(req.url);
+        
+        
+        debug('quering path %s', path)
+        if (path[0] !== '/') path = "/" + path;
+        
+        let asset = await this._assets.getByPath(path);
+        if (!asset) throw new HttpError("Not Found", 404);
+        
+        await this._assets.remove(asset);
+        await this._writeJSON(res, {
+            status: 'ok'
+        });
         
     }
 

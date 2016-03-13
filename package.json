@@ -22,6 +22,7 @@
     "requiredir": "^1.0.7"
   },
   "dependencies": {
+    "assets.gallery": "git+https://github.com/kildevaeld/assets.gallery.git",
     "commander": "^2.9.0",
     "debug": "^2.2.0",
     "etag": "^1.7.0",

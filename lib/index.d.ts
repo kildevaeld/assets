@@ -26,6 +26,7 @@ export interface AssetCreateOptions {
     size?: number;
     mime?: string;
     name?: string;
+    hidden?: boolean;
     skipMeta: boolean;
 }
 export declare class Assets extends EventEmitter {

@@ -2,6 +2,10 @@
 import {IFileStore, IFile} from '../interface';
 import {Readable} from 'stream';
 import * as Path from 'path';
+import * as Debug from 'debug';
+
+const debug = Debug('assets:filestore:s3')
+
 
 const knox = require('knox');
 
@@ -47,15 +51,18 @@ export class S3FileStore implements IFileStore {
             'x-amz-acl':  this.options.public ?  'public-read' : 'private'
         };
         
+        let path = Path.join(asset.path, asset.filename);
         // check to see if we should use multipart
         if (asset.size > MAX_FILE_SIZE) {
             
         } else {
-          
-          let resp = await this._putStream(stream, Path.join(asset.path, asset.filename), headers);
-          
-            
+          debug('uploading to "%s": %j', path, headers);
+          let resp = await this._putStream(stream, path, headers);
+          debug('uploaded to "%s", %j', path, resp);
+          asset.meta['s3_url'] = "";
         }
+        
+        return asset;
         
     }
     

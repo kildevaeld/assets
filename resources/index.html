@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" type="text/css" href="/css/assets-gallery.css">
+        <script src="/js/assets-gallery.js"></script>
+        <meta charset="utf8">
+        <style>
+            #gallery {
+                height:100vh;
+            }
+            .gallery {
+                font-family: 'HelveticaNeue';
+                width: 700px;
+                height: 300px;
+            }
+            .gallery-list {
+                width: 55%;
+                height: 100%;
+                float: left;
+            }
+            .gallery-preview {
+                width: 45%;
+                height: 100%;
+                float:left;
+            }
+            .assets-list-item {
+                font-size: 11px;
+                font-weight: 500;
+            }
+        </style>
+    </head>
+    
+    <body>
+        <div id="gallery"></div>
+        
+        <script>
+            "use strict";
+            var gallery = new Assets.GalleryView({
+                url: '/files',
+                deleteable: true
+            });
+            var container = document.getElementById('gallery');
+            gallery.render().appendTo(container);
+            
+            gallery.collection.fetch();
+            
+        </script>
+    </body>
+</html>

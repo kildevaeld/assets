@@ -50,7 +50,7 @@ export interface AssetCreateOptions {
     size?: number;
     mime?: string;
     name?: string;
-
+    hidden?:boolean;
     skipMeta: boolean;
 }
 
@@ -221,16 +221,25 @@ export class Assets extends EventEmitter {
      */
     async getByPath(path: string): Promise<Asset> {
 
-        let info = await this.metaStore.find({
+        let infos = await this.metaStore.find({
             path: path
         });
+        
+        let info: IFile;
+        for (let i = 0, ii = infos.length; i < ii; i++ ) {
+            if (Path.join(infos[i].path, infos[i].filename) === path) {
+                info = infos[i];
+                break;
+            }
+        }
 
-        if (!info || info.length === 0) return null;
+        /*if (!info || info.length === 0) return null;
 
         if (!(info[0] instanceof Asset)) {
             info[0] = new Asset(info[0]);
         }
-        return <Asset>info[0];
+        return <Asset>info[0];*/
+        return <Asset>info;
     }
     
    

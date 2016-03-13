@@ -28,7 +28,11 @@ export function getFileStats(path: string): Promise<fs.Stats> {
 }
 
 export function getMimeType(path: string): string {
-    return Mime.lookup(path);
+    let mime =  Mime.lookup(path);
+    if (mime === false) {
+        mime = "application/octet-stream";
+    }
+    return mime;
 }
 
 export function writeStream(stream:Readable, path: string): Promise<void> {
