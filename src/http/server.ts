@@ -333,7 +333,7 @@ export class AssetsRouter {
         return new Promise((resolve,reject) => {
            
            let form = new formidable.IncomingForm();
-        
+           form.keepExtensions = true;
            form.parse(req, (err, fields: formidable.Fields, files: formidable.Files) => {
                 if (err) return reject(err);
                 resolve({fields,files});
