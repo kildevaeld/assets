@@ -232,14 +232,18 @@ export class Assets extends EventEmitter {
                 break;
             }
         }
-
-        /*if (!info || info.length === 0) return null;
-
-        if (!(info[0] instanceof Asset)) {
-            info[0] = new Asset(info[0]);
-        }
-        return <Asset>info[0];*/
         return <Asset>info;
+    }
+    
+    async query(term: string): Promise<Asset[]> {
+        return (await this.metaStore.find({
+            path: term
+        })).map( a => {
+            if (a instanceof Asset) {
+                return a;
+            }
+            return new Asset(a); 
+        });
     }
     
    

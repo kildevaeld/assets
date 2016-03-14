@@ -54,6 +54,7 @@ export declare class Assets extends EventEmitter {
      * @return Promise<Asset>
      */
     getByPath(path: string): Promise<Asset>;
+    query(term: string): Promise<Asset[]>;
     remove(asset: Asset): Promise<void>;
     list(options?: IListOptions): Promise<Asset[]>;
     stream(asset: IFile): Promise<Readable>;

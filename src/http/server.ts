@@ -25,7 +25,7 @@ interface Route {
 
 interface RouteMap {
     list: Route;
-    create: RegExp;    
+    create: RegExp;
 }
 
 class HttpError extends Error {
@@ -35,7 +35,7 @@ class HttpError extends Error {
         this.message = msg;
         this.code = code;
     }
-    
+
     toJSON(): any {
         return {
             code: this.code,
@@ -46,14 +46,14 @@ class HttpError extends Error {
 
 export class AssetsRouter {
     private _routes: Route[];
-        
+
     constructor(private _assets: Assets, private opts: AssetsRouterOptions = {}) {
         let prefix = opts.prefix;
         if (prefix == null || prefix === "") prefix = "/";
         if (prefix !== "/") {
             if (prefix[prefix.length -1] !== "/") prefix += '/';
         }
-        
+
         this.opts.prefix = prefix;
 
 
@@ -76,28 +76,28 @@ export class AssetsRouter {
         }];
 
     }
-    
+
     async middlewareKoa2 (ctx, next): Promise<void> {
         await this.middleware(ctx.req, ctx.res, next);
     }
-    
+
     * middlewareKoa (ctx, next) {
         yield ctx.middleware(ctx.req, ctx.res, next);
     }
-    
+
     middleware (req:http.IncomingMessage, res:http.ServerResponse, next?): Promise<any> {
         let {method, url} = req;
-        
+
         let index = url.indexOf('?');
-        
+
         if (index > -1) {
             url = url.substr(0, index);
         }
-        
+
         debug('trying route: "%s"...', url);
-        
+
         let route: Route, match: string[];
-        
+
         for (let i = 0, ii = this._routes.length; i < ii; i++) {
             route = this._routes[i];
             match = route.reg.exec(url);
@@ -106,7 +106,7 @@ export class AssetsRouter {
             }
             route = null;
         }
-        
+
         if (route === null) {
             debug('route no match');
             return next ? next() : void 0;
@@ -116,90 +116,90 @@ export class AssetsRouter {
         .catch( e => {
             this._writeJSON(res, e, e.code||500);
         })
-    
+
     }
-    
+
     async create(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
-        
+
         if (req.headers['content-type'].indexOf('multipart/form-data') == -1) {
             throw new Error('not multiform');
         }
-        
+
         let {files, fields} = await this._readForm(req);
-        
+
         let file: formidable.File;
         for (let k in files) {
             file = files[k];
             break;
         }
-        
+
         if (!file) throw new Error('not file');
-        
-        
+
+
         let path = fields['path']|| '/',
             dest = Path.join(path, file.name),
             opts: AssetCreateOptions = {skipMeta:false};
-            
+
         if (fields['name'] && fields['name'] != "") {
             opts.name = fields['name'];
         }
-        
+
         if (fields['mime'] && fields['mime'] != "") {
             opts.mime = fields['mime'];
         }
         debug('create file "%s", options "%j"', dest, opts);
         let asset = await this._assets.createFromPath(file.path, dest, opts);
-        
+
         await this._writeJSON(res, asset, 201);
-        
+
     }
-    
-    
+
+
     async list (req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
-        
+
         let query = this._getQuery(req.url);
-        
+
         if (query.id) {
             let asset = await this._assets.getById(query.id);
             if (!asset) {
                 throw new HttpError("Not Found", 400);
-            } 
-            
+            }
+
             if (req.method === 'DELETE') {
                 await this._assets.remove(asset);
                 return await this._writeJSON(res, {
                     status: 'ok'
                 });
             }
-     
+
             return await this._writeJSON(res, asset);
         }
-        
+
         if (req.method === 'DELETE') throw new HttpError("No id");
-        
+
         let page = 1, limit = 1000;
         if (query.page) {
             let i = parseInt(query.page);
             if (!isNaN(i)) page = i;
         }
-        
+
         if (query.limit) {
             let i = parseInt(query.limit);
             if (!isNaN(i)) limit = i;
         }
-        
+
         if (page <= 0) page = 1;
-        
+
         let result;
         if (query.q) {
-            
-            result = {}
-            
+
+            result = await this._assets.query(query.q);
+
         } else {
             let count = await this._assets.metaStore.count();
             let pages = Math.ceil(count / limit);
             let offset = limit * (page - 1);
-            
+
             if (offset > count) {
                 result = [];
             } else {
@@ -208,44 +208,44 @@ export class AssetsRouter {
                     limit: limit
                 });
             }
-            
+
             let links: any = {
                 first: 1,
                 last: pages
             };
-            
+
             if (page > 1) links.prev = page - 1;
             if (page < pages) links.next = page + 1;
-            
+
             this._writeLinksHeader(req, res, links);
-        
+
         }
-            
+
         await this._writeJSON(res, result);
-        
+
     }
-    
+
     async getResource (req: http.IncomingMessage, res: http.ServerResponse, path: string): Promise<void> {
-        
+
         let query = this._getQuery(req.url);
-        
+
         if (path[0] !== '/') path = "/" + path;
-        
+
         let asset = await this._assets.getByPath(path);
-        
+
         if (!asset) throw new HttpError("Not Found", 404);
-        
+
         if (toBoolean(query.meta)) {
             return await this._writeJSON(res, asset, 200);
         }
-        
+
         res.setHeader('Content-Type', asset.mime);
         res.setHeader('Content-Length', asset.size + "");
-        
+
         if (toBoolean(query.download)) {
             res.setHeader('Content-Disposition', 'attachment; filename=' + asset.filename);
         }
-        
+
         let outStream;
         if (toBoolean(query.thumbnail)) {
             res.setHeader('Content-Type', 'image/png');
@@ -256,40 +256,40 @@ export class AssetsRouter {
         } else {
              outStream = await this._assets.stream(asset);
         }
-        
+
         res.writeHead(200);
         outStream.pipe(res);
-        
+
     }
 
-    
+
     async removeResource(req: http.IncomingMessage, res: http.ServerResponse, path: string): Promise<void> {
         let query = this._getQuery(req.url);
-        
-        
+
+
         debug('quering path %s', path)
         if (path[0] !== '/') path = "/" + path;
-        
+
         let asset = await this._assets.getByPath(path);
         if (!asset) throw new HttpError("Not Found", 404);
-        
+
         await this._assets.remove(asset);
         await this._writeJSON(res, {
             status: 'ok'
         });
-        
+
     }
 
-    
+
     private _writeJSON(res: http.ServerResponse, json:any, status:number = 200): Promise<void> {
-        
+
         let str = JSON.stringify(json);
-        
+
         res.writeHead(status, {
             'Content-Type': 'application/json',
             'Content-Length': str.length + ""
         });
-        
+
         return new Promise<void>((resolve, reject) => {
             res.write(str, (e) => {
                 if (e) return reject(e);
@@ -297,63 +297,63 @@ export class AssetsRouter {
             });
             res.end();
         })
-       
+
     }
-    
+
     private _getQuery(url:string): any {
        let index = url.indexOf('?');
-        
+
         if (index > -1) {
             let str = url.substr(index + 1, url.length - 1);
             return querystring.parse(str);
         }
         return {};
     }
-    
+
     private _readBody(req: http.IncomingMessage): Promise<string> {
         return new Promise((resolve, reject) => {
-           
+
            var buffer = [];
-           
+
            req.on('data', (data) => {
                buffer.push(data);
            });
-           
+
            req.on('end', () => {
                resolve(Buffer.concat(buffer).toString());
            });
-           
+
            req.on('error', reject);
-           
-            
+
+
         });
     }
-    
+
     private _readForm(req: http.IncomingMessage): Promise<{fields:formidable.Fields, files:formidable.Files}> {
         return new Promise((resolve,reject) => {
-           
+
            let form = new formidable.IncomingForm();
            form.keepExtensions = true;
            form.parse(req, (err, fields: formidable.Fields, files: formidable.Files) => {
                 if (err) return reject(err);
                 resolve({fields,files});
            });
-          
+
         });
     }
-    
+
     private _writeLinksHeader(req: http.IncomingMessage, res: http.ServerResponse, links: {prev?:number, next?:number, last?:number, first?:number}) {
-        
+
         let url = req.url;
-        
+
         url = req.headers['host'] + url +  (url.indexOf('?') == -1 ? "?" : "&") + 'page=';
-       
+
         url = "http://" + url
-        
+
         res.setHeader('Link', Object.keys(links).map(function(rel){
             return '<' + url + links[rel] + '>; rel="' + rel + '"';
-        }).join(', '));   
+        }).join(', '));
     }
-    
-} 
+
+}
 
