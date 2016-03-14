@@ -16,7 +16,7 @@ const _generators: { [key: string]: ThumbnailGenerator } = {};
 function thumbName(path: string): string {
     let ext = Path.extname(path), basename = Path.basename(path, ext),
         dir = Path.dirname(path)
-    dir = dir == '.' ? '' : dir + '/';
+    dir = dir == '.' ? '' : dir == '/' ? dir : dir + '/';
     let thumbnail = dir + basename + '.thumbnail.png';
 
     return thumbnail;
@@ -38,7 +38,7 @@ export class Thumbnailer {
     }
     
     static getGenerator(mime:string) {
-        debug("generator %s : %s", mime, _generators[mime]);
+        
         return _generators[mime];
     }
     constructor(options?: ThumbnailerOptions) {
@@ -54,11 +54,14 @@ export class Thumbnailer {
 
     async request(asset: IFile): Promise<Readable> {
         if ((await this.has(asset))) {
-            let path = thumbName(asset.path);
-            
-            return this._assets.fileStore.stream(<any>{
-                path: path,
+            let path = thumbName(asset.filename);
+            debug('request %s', path)
+            let stream = await this._assets.fileStore.stream(<any>{
+                filename: path,
+                path: asset.path
             });
+           
+            return stream;
         }
         return null;
     }
@@ -67,13 +70,13 @@ export class Thumbnailer {
         if (!(await this.canThumbnail(asset.mime))) return false;
 
         try {
-            let path = thumbName(asset.path)
-
-            if (await this._assets.fileStore.has(<any>{ path: path })) {
+            let path = thumbName(asset.filename)
+            debug('thumbname %s', path)
+            if (await this._assets.fileStore.has(<any>{ path: asset.path, filename: path })) {
                 debug('already have thumbnail')
                 return true;
             }
-
+            
             let info = await this._generateThumbnail(asset, path);
 
             if (info == null) {
@@ -85,6 +88,7 @@ export class Thumbnailer {
 
         } catch (e) {
             debug('could not generate thumbnail ', e.message);
+            console.log(e.stack)
             return false;
         }
     }
@@ -94,7 +98,7 @@ export class Thumbnailer {
         return !!_generators[mime];
     }
 
-    private async _generateThumbnail(asset: IFile, path: string): Promise<IFile> {
+    private async _generateThumbnail(asset: IFile, filename: string): Promise<IFile> {
 
         let generator = Thumbnailer.getGenerator(asset.mime);
 
@@ -106,8 +110,8 @@ export class Thumbnailer {
 
         let {stream, info} = await generator(rs);
 
-        info.path = path;
-        info.filename = Path.basename(path);
+        info.path = asset.path;
+        info.filename = filename
 
         if (stream && info) {
             await this._assets.fileStore.create(info, stream);

@@ -114,14 +114,14 @@ export class AssetsRouter {
         debug('found route: "%s"', route.fn);
         return this[route.fn].call(this, req, res, match.length == 2 ? decodeURIComponent(match[1]) : undefined)
         .catch( e => {
-            console.log('e', e)
+            console.log('e', e.stack)
             this._writeJSON(res, e, e.code||500);
         })
 
     }
 
     async create(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
-        console.log(req.headers);
+        
         let contentType = req.headers['content-type']
         if (!contentType || contentType.indexOf('multipart/form-data') == -1) {
             //throw new Error('not multiform');
@@ -132,13 +132,14 @@ export class AssetsRouter {
                 let len = parseInt(req.headers['content-length']),
                     type : string = req.headers['content-type'];
 
-                console.log('type ', type, ' len', len);
+               
 
                 let path = query.path||'/'
                 if (path[path.length - 1] != '/') path += '/';
                 let asset = await this._assets.create(req, path + query.filename, {
                     mime: type,
-                    size: len
+                    size: len,
+                    skipMeta: false
                 });
 
                 return this._writeJSON(res, asset);
@@ -262,7 +263,7 @@ export class AssetsRouter {
         }
 
         res.setHeader('Content-Type', asset.mime);
-        res.setHeader('Content-Length', asset.size + "");
+        //res.setHeader('Content-Length', asset.size + "");
 
         if (toBoolean(query.download)) {
             res.setHeader('Content-Disposition', 'attachment; filename=' + asset.filename);
@@ -273,7 +274,7 @@ export class AssetsRouter {
             res.setHeader('Content-Type', 'image/png');
             outStream = await this._assets.thumbnail(asset);
             if (outStream == null) {
-                throw new HttpError('Cannot generate thumbnail for mimetype', 300);
+                throw new HttpError('Cannot generate thumbnail for mimetype', 400);
             }
         } else {
              outStream = await this._assets.stream(asset);

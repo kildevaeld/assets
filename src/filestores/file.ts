@@ -4,6 +4,9 @@ import * as Path from 'path';
 import {IFileStore, IFile} from '../interface';
 import {registerFileStore} from '../repository';
 import {getFileStats, writeStream} from '../utils';
+import * as Debug from 'debug';
+
+const debug = Debug('assets:filestore:filesystem');
 
 const fs = require('mz/fs'),
     mkdirp = require('mkdirp-promise');
@@ -32,6 +35,7 @@ export class FileStoreFileSystem implements IFileStore {
                 throw new Error("A files called " + asset.path + " already exists")
             }
         } catch (e) {
+            console.log(e)
             await mkdirp(bnF);
         }
         
@@ -63,7 +67,7 @@ export class FileStoreFileSystem implements IFileStore {
             return null; 
         }
         let fp = this._getPath(asset);
-        
+        debug('CREATE CREATE %s', fp)
         return fs.createReadStream(fp);
     }
     async has(asset: IFile): Promise<boolean> {
@@ -83,6 +87,7 @@ export class FileStoreFileSystem implements IFileStore {
             return Path.join(this.opts.path, asset);
         }
         let a = <IFile>asset;
+        debug('get path %j', asset);
         return Path.join(this.opts.path, a.path, a.filename);
     }
     

@@ -122,7 +122,9 @@ export class Assets extends EventEmitter {
     }
     
     async thumbnail (asset:Asset): Promise<Readable> {
-        return await this.thumbnailer.request(asset);
+        let stream = await this.thumbnailer.request(asset);
+        debug("go stream, %s", stream != null)
+        return stream;
     }
     
     canThumbnail (asset:Asset): boolean {

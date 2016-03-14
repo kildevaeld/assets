@@ -18,6 +18,6 @@ export declare class Thumbnailer {
     request(asset: IFile): Promise<Readable>;
     has(asset: IFile): Promise<boolean>;
     canThumbnail(mime: string): boolean;
-    private _generateThumbnail(asset, path);
+    private _generateThumbnail(asset, filename);
     private _onAssetRemove(asset);
 }
