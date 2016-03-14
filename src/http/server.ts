@@ -114,14 +114,36 @@ export class AssetsRouter {
         debug('found route: "%s"', route.fn);
         return this[route.fn].call(this, req, res, match.length == 2 ? decodeURIComponent(match[1]) : undefined)
         .catch( e => {
+            console.log('e', e)
             this._writeJSON(res, e, e.code||500);
         })
 
     }
 
     async create(req: http.IncomingMessage, res: http.ServerResponse): Promise<void> {
+        console.log(req.headers);
+        let contentType = req.headers['content-type']
+        if (!contentType || contentType.indexOf('multipart/form-data') == -1) {
+            //throw new Error('not multiform');
+            let query = this._getQuery(req.url);
 
-        if (req.headers['content-type'].indexOf('multipart/form-data') == -1) {
+            if (query.filename) {
+
+                let len = parseInt(req.headers['content-length']),
+                    type : string = req.headers['content-type'];
+
+                console.log('type ', type, ' len', len);
+
+                let path = query.path||'/'
+                if (path[path.length - 1] != '/') path += '/';
+                let asset = await this._assets.create(req, path + query.filename, {
+                    mime: type,
+                    size: len
+                });
+
+                return this._writeJSON(res, asset);
+
+            }
             throw new Error('not multiform');
         }
 
