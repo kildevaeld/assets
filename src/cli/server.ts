@@ -17,8 +17,13 @@ export function serverCommand(program) {
     .action(function () {
         let options = pick(cmd, ['port', 'web', 'config']);
         
-    
-        startServer(options);
+        try {
+            startServer(options);    
+        } catch (e) {
+            console.log('Could not start server: %s', e.message);
+            process.exit(-1);
+        }
+        
     });
     
     cmd.option("-p, --port <port>", "port to use [default: 5000]", 5000)
@@ -41,11 +46,16 @@ function startServer (options) {
         process.exit(0);
     } 
     
+    let config = {};
+    if (options.config) {
+        let configPath = options.config; 
+        if (!Path.isAbsolute(configPath))
+            configPath = Path.resolve(options.config);
+        config = require(configPath);
+        console.log('Using config file: %s', configPath);
+    }
     
-    let assets = new Assets({
-        dataStore: 'file',
-        metaStore: 'file'
-    });
+    let assets = new Assets(config);
     
 
    
