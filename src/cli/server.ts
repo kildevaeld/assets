@@ -43,13 +43,7 @@ function startServer (options) {
     
     
     let assets = new Assets({
-        dataStore: 's3',
-        dataStoreOptions: {
-            secret: 'f3KSVssWQ+c8/yY3nA2/E0XhKCFnQ7FkiPXrS/nr',
-            key: 'AKIAJ3EOK5DHWADBS4QQ',
-            bucket: 'livejazz-dev',
-            region: 'eu-west-1'
-        },
+        dataStore: 'file',
         metaStore: 'file'
     });
     

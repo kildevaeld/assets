@@ -132,6 +132,7 @@ export class Thumbnailer {
 
     private async _onAssetRemove(asset: IFile): Promise<void> {
         if (asset.meta && asset.meta['destroyed']) return;
+        
         let path = thumbName(asset.filename);
     
         try {
