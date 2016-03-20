@@ -18,8 +18,8 @@ export interface MimeFunc {
 }
 export interface AssetsOptions {
     metaStore?: string | IMetaStore;
-    dataStore?: string | IFileStore;
-    dataStoreOptions?: any;
+    fileStore?: string | IFileStore;
+    fileStoreOptions?: any;
     metaStoreOptions?: any;
 }
 export interface AssetCreateOptions {

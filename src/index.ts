@@ -52,8 +52,8 @@ interface MimeMap {
 
 export interface AssetsOptions {
     metaStore?: string|IMetaStore;
-    dataStore?: string|IFileStore;
-    dataStoreOptions?: any;
+    fileStore?: string|IFileStore;
+    fileStoreOptions?: any;
     metaStoreOptions?: any;
 }
 
@@ -94,8 +94,8 @@ export class Assets extends EventEmitter {
         if (!options.metaStore) {
             options.metaStore = 'file';
         }
-        if (!options.dataStore) {
-            options.dataStore = 'file';
+        if (!options.fileStore) {
+            options.fileStore = 'file';
         }
         
         let meta: IMetaStore, file: IFileStore;
@@ -105,10 +105,10 @@ export class Assets extends EventEmitter {
             meta = <IMetaStore>options.metaStore;
         }
 
-        if (isString(options.dataStore)) {
-            file = getFileStore(<string>options.dataStore, options.dataStoreOptions);
+        if (isString(options.fileStore)) {
+            file = getFileStore(<string>options.fileStore, options.fileStoreOptions);
         } else {
-            file = <IFileStore>options.dataStore;
+            file = <IFileStore>options.fileStore;
         }
 
         if (!meta || !file) {
