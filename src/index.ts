@@ -13,6 +13,8 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as Debug from 'debug';
 
+
+const sanitize = require('sanitize-filename');
 const debug = Debug('assets');
 
 export enum Hook {
@@ -51,7 +53,8 @@ export interface AssetCreateOptions {
     mime?: string;
     name?: string;
     hidden?:boolean;
-    skipMeta: boolean;
+    skipMeta?: boolean;
+    meta?:{[key: string]: any};
 }
 
 export class Assets extends EventEmitter {
@@ -123,7 +126,6 @@ export class Assets extends EventEmitter {
     
     async thumbnail (asset:Asset): Promise<Readable> {
         let stream = await this.thumbnailer.request(asset);
-        debug("go stream, %s", stream != null)
         return stream;
     }
     
@@ -152,9 +154,14 @@ export class Assets extends EventEmitter {
 
         const clean = () => { if (tmpFile) fs.unlink(tmpFile); };
 
+        
+        let filename = Path.basename(path);
+        filename = sanitize(filename.replace(/[^a-z0-9\-\.]/gi, '_'));
+        
+
         // If mime or size isnt provided, we have to get it
         // the hard way
-        if (!options.mime || !options.size) {
+        if ((!options.mime || !options.size) || (options.mime === "" || options.size === 0)) {
 
             tmpFile = await this._createTemp(stream, path);
 
@@ -166,11 +173,13 @@ export class Assets extends EventEmitter {
         }
 
         let asset = new Asset({
-            name: options.name,
+            name: options.name||filename,
             path: Path.dirname(path),
-            filename: Path.basename(path),
+            filename: filename,
             mime: options.mime,
-            size: options.size
+            size: options.size,
+            hidden: options.hidden,
+            meta: options.meta || {}
         });
 
         var self = this;
@@ -251,13 +260,14 @@ export class Assets extends EventEmitter {
    
 
     async remove(asset: Asset): Promise<void> {
-
+        
         if ((await this.getById(asset.id)) == null) {
             return null;
         }
-
+        this._runHook(Hook.BeforeRemove, asset)
         await this.fileStore.remove(asset);
         await this.metaStore.remove(asset);
+        this._runHook(Hook.Remove, asset)
 
     }
 
@@ -313,7 +323,7 @@ export class Assets extends EventEmitter {
     private async _runHook(hook: Hook, asset: Asset, fn?: () => Promise<Readable>): Promise<void> {
         let hooks: HookFunc[] = this._hooks.get(hook);
         if (!hooks) return;
-
+        debug("run hook %s (%d)", Hook[hook], hooks.length);
         for (let i = 0, ii = hooks.length; i < ii; i++) {
             await hooks[i](asset, fn);
         }

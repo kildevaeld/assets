@@ -15,13 +15,17 @@ export function serverCommand(program) {
     
     var cmd: commander.ICommand = program.command('http')
     .action(function () {
-        let options = pick(cmd, ['port', 'client']);
+        let options = pick(cmd, ['port', 'web', 'config']);
+        
     
         startServer(options);
     });
     
     cmd.option("-p, --port <port>", "port to use [default: 5000]", 5000)
-    .option('-c, --client', 'client');  
+    .option('-w, --web', 'web client')
+    .option('-c, --config <path>');
+    
+      
 }
 
 
@@ -38,10 +42,20 @@ function startServer (options) {
     } 
     
     
-    let assets = new Assets({});
+    let assets = new Assets({
+        dataStore: 's3',
+        dataStoreOptions: {
+            secret: 'f3KSVssWQ+c8/yY3nA2/E0XhKCFnQ7FkiPXrS/nr',
+            key: 'AKIAJ3EOK5DHWADBS4QQ',
+            bucket: 'livejazz-dev',
+            region: 'eu-west-1'
+        },
+        metaStore: 'file'
+    });
     
 
-    let prefix = options.client ? '/files' : '/';
+   
+    let prefix = options.web ? '/files' : '/';
     
     router = new AssetsRouter(assets, {
         prefix: prefix
@@ -51,7 +65,7 @@ function startServer (options) {
        
        router.middleware(req, res, () => {
            
-           if (options.client) {
+           if (options.web) {
                debug('handle client');
                return handleClient(assets, req, res).catch( e => {
                    console.error(e.stack);

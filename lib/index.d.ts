@@ -27,7 +27,10 @@ export interface AssetCreateOptions {
     mime?: string;
     name?: string;
     hidden?: boolean;
-    skipMeta: boolean;
+    skipMeta?: boolean;
+    meta?: {
+        [key: string]: any;
+    };
 }
 export declare class Assets extends EventEmitter {
     protected _metaStore: IMetaStore;

@@ -18,6 +18,7 @@ export interface IFile {
 export interface IListOptions {
     offset?: number;
     limit?: number;
+    hidden?: boolean;
 }
 
 export interface ICreateOptions {
@@ -41,7 +42,7 @@ export interface IMetaStore {
 
 export interface IFileStore {
     initialize(): Promise<void>
-    create(asset: IFile, stream: Readable): Promise<IFile>;
+    create(asset: IFile, stream: Readable, options?:any): Promise<IFile>;
     remove(asset: IFile): Promise<IFile>;
     stream(asset: IFile): Promise<Readable>;
     has(asset: IFile): Promise<boolean>;

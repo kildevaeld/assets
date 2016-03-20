@@ -68,6 +68,10 @@ export class Thumbnailer {
 
     async has(asset: IFile): Promise<boolean> {
         if (!(await this.canThumbnail(asset.mime))) return false;
+        
+        if (asset.meta && asset.meta['thumbnail'] === true) {
+            return false;
+        }
 
         try {
             let path = thumbName(asset.filename)
@@ -112,9 +116,13 @@ export class Thumbnailer {
 
         info.path = asset.path;
         info.filename = filename
-
+        info.hidden = true;
+        info.meta['thumbnail'] = true
+        
+        let path = Path.join(info.path, info.filename)
+        
         if (stream && info) {
-            await this._assets.fileStore.create(info, stream);
+            await this._assets.create(stream, path, info);
             return info;
         } else {
             return null;
@@ -123,11 +131,20 @@ export class Thumbnailer {
     }
 
     private async _onAssetRemove(asset: IFile): Promise<void> {
-        let path = thumbName(asset.path);
+        if (asset.meta && asset.meta['destroyed']) return;
+        let path = thumbName(asset.filename);
     
         try {
-            await this._assets.fileStore.remove(<any>{path: path});
-        } catch (e) { }
+            let thumbnail = await this._assets.getByPath(Path.join(asset.path,path));
+            if (thumbnail && thumbnail.meta['thumbnail'] === true) {
+                debug("removing thumbnail associated with %j", asset)
+                await this._assets.remove(<any>{path: asset.path, filename: path});    
+                asset.meta = { 'destroyed': true };
+            }
+            
+        } catch (e) { 
+           console.log('could not remove thumnail %s', path, e) 
+        }
         
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "assets",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -33,6 +33,7 @@
     "mime-types": "^2.1.10",
     "mkdirp-promise": "^1.0.3",
     "mz": "^2.3.1",
-    "path-to-regexp": "^1.2.1"
+    "path-to-regexp": "^1.2.1",
+    "sanitize-filename": "^1.5.3"
   }
 }

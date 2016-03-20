@@ -56,10 +56,10 @@ export class FileMetaStore implements IMetaStore {
         let out: IFile[] = [];
         let index = 0, found = 0;
         for (let key in this.files) {
-            if (++index < options.offset) continue;
+            if (++index < options.offset || (this.files[key].hidden && !options.hidden)) continue;
             out.push(this.files[key]);
             found++;
-            if (found == limit) break;
+            if (found === limit) break;
         }
         
         

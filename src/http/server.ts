@@ -274,7 +274,7 @@ export class AssetsRouter {
             res.setHeader('Content-Type', 'image/png');
             outStream = await this._assets.thumbnail(asset);
             if (outStream == null) {
-                throw new HttpError('Cannot generate thumbnail for mimetype', 400);
+                throw new HttpError('Cannot generate thumbnail for mimetype: ' + asset.mime , 400);
             }
         } else {
              outStream = await this._assets.stream(asset);
