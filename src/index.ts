@@ -14,8 +14,15 @@ import * as fs from 'fs';
 import * as Debug from 'debug';
 
 
+
+
 const sanitize = require('sanitize-filename');
 const debug = Debug('assets');
+
+var idCounter = 0;
+function getId(): string {
+    return ++idCounter + "";
+}
 
 export enum Hook {
     BeforeCreate,
@@ -31,6 +38,8 @@ function isString(a:any): a is String {
 export interface HookFunc {
     (asset: Asset, fn?: () => Promise<Readable>): Promise<void>;
 }
+
+type hook_tuple = [string, HookFunc]; 
 
 export interface MimeFunc {
     (asset: Asset, fn?: () => Promise<Readable>): Promise<void>;
@@ -69,7 +78,7 @@ export class Assets extends EventEmitter {
     
     protected thumbnailer: Thumbnailer;
      
-    private _hooks: Map<Hook, HookFunc[]>;
+    private _hooks: Map<Hook, hook_tuple[]>;
     private _mimeHandlers: MimeMap[];
     
     constructor(options: AssetsOptions) {
@@ -303,14 +312,26 @@ export class Assets extends EventEmitter {
         return this;
     }
 
-    registerHook(hook: Hook, ...fn: HookFunc[]) {
+    registerHook(hook: Hook, fn: HookFunc): string {
         if (!this._hooks.has(hook)) {
             this._hooks.set(hook, []);
         }
-        for (let i = 0, ii = fn.length; i < ii; i++) {
-            this._hooks.get(hook).push(fn[i]);
+        let id = getId();
+        this._hooks.get(hook).push([id, fn]);
+        return id;
+    }
+    
+    unregister(hook: Hook, fn: HookFunc|string) {
+        if (!this._hooks.has(hook)) return;
+        
+        let hooks = this._hooks.get(hook)
+        
+        for (let i = 0, ii = hooks.length; i < ii; i++) {
+            if (hooks[i][0] === fn || hooks[i][1] === fn) {
+                hooks.splice(i, 1);
+            }
         }
-
+        
     }
 
     private async _createTemp(stream: Readable, path: string): Promise<string> {
@@ -321,11 +342,12 @@ export class Assets extends EventEmitter {
     }
 
     private async _runHook(hook: Hook, asset: Asset, fn?: () => Promise<Readable>): Promise<void> {
-        let hooks: HookFunc[] = this._hooks.get(hook);
+        let hooks: hook_tuple[] = this._hooks.get(hook);
         if (!hooks) return;
         debug("run hook %s (%d)", Hook[hook], hooks.length);
         for (let i = 0, ii = hooks.length; i < ii; i++) {
-            await hooks[i](asset, fn);
+            debug("run hook id %s", hooks[i][0]);
+            await hooks[i][1](asset, fn);
         }
     }
     

@@ -20,13 +20,13 @@
     "src/repository.ts",
     "src/thumbnailer.ts",
     "src/utils.ts",
-    "src/generators/generators.ts",
-    "src/generators/index.ts",
-    "src/filestores/file.ts",
-    "src/filestores/s3.ts",
     "src/cli/index.ts",
     "src/cli/server.ts",
+    "src/filestores/file.ts",
+    "src/filestores/s3.ts",
     "src/http/server.ts",
+    "src/generators/generators.ts",
+    "src/generators/index.ts",
     "src/metastores/file.ts",
     "src/rpc/index.ts"
   ]

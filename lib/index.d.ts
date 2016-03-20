@@ -62,7 +62,8 @@ export declare class Assets extends EventEmitter {
     list(options?: IListOptions): Promise<Asset[]>;
     stream(asset: IFile): Promise<Readable>;
     use(mime: string | MimeFunc, fn?: MimeFunc): this;
-    registerHook(hook: Hook, ...fn: HookFunc[]): void;
+    registerHook(hook: Hook, fn: HookFunc): string;
+    unregister(hook: Hook, fn: HookFunc | string): void;
     private _createTemp(stream, path);
     private _runHook(hook, asset, fn?);
     private _runHandlers(asset);
