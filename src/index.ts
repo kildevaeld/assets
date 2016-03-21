@@ -146,6 +146,7 @@ export class Assets extends EventEmitter {
         return this.thumbnailer.canThumbnail(asset.mime);
     }
     
+    
     async createFromPath(path: string, dest: string, options: AssetCreateOptions = { skipMeta: false }) {
         
         let stat = await getFileStats(path);
@@ -243,20 +244,24 @@ export class Assets extends EventEmitter {
      * @param {string} path The full path to the file
      * @return Promise<Asset>
      */
-    async getByPath(path: string): Promise<Asset> {
-
-        let infos = await this.metaStore.find({
-            path: path
+    getByPath(path: string): Promise<Asset> {
+        
+        return this.metaStore.getByPath(path)
+        .then( asset => {
+            if (asset) {
+                if (!(asset instanceof Asset)) asset = new Asset(asset);
+            }
+            return asset;    
         });
         
-        let info: IFile;
-        for (let i = 0, ii = infos.length; i < ii; i++ ) {
-            if (Path.join(infos[i].path, infos[i].filename) === path) {
-                info = infos[i];
-                break;
-            }
-        }
-        return <Asset>info;
+        
+    }
+    
+    has(path: string): Promise<boolean> {
+        return this.getByPath(path)
+        .then( a => {
+            return a != null;
+        });
     }
     
     async query(term: string): Promise<Asset[]> {

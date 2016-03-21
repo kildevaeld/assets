@@ -75,8 +75,11 @@ export class Thumbnailer {
 
         try {
             let path = thumbName(asset.filename)
+            
+            let fp = Path.join(asset.path, path);
+            
             debug('thumbname %s', path)
-            if (await this._assets.fileStore.has(<any>{ path: asset.path, filename: path })) {
+            if (await this._assets.has(fp)) {
                 debug('already have thumbnail')
                 return true;
             }

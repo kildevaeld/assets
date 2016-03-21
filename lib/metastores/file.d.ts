@@ -14,6 +14,7 @@ export declare class FileMetaStore implements IMetaStore {
     list(options?: IListOptions): Promise<IFile[]>;
     find(options: IFindOptions): Promise<IFile[]>;
     get(id: string): Promise<IFile>;
+    getByPath(path: string): Promise<IFile>;
     removeAll(): Promise<void>;
     count(): Promise<number>;
     private _initPath(path);

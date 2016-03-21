@@ -20,7 +20,6 @@ export declare class S3FileStore implements IFileStore {
     create(asset: IFile, stream: Readable): Promise<IFile>;
     remove(asset: IFile): Promise<IFile>;
     stream(asset: IFile): Promise<Readable>;
-    has(asset: IFile): Promise<boolean>;
     private _putStream(stream, dest, headers?);
     private _getStream(path);
     private _deleteFile(path);

@@ -32,6 +32,7 @@ export interface IMetaStore {
     list(options?: IListOptions): Promise<IFile[]>;
     find(options?: IFindOptions): Promise<IFile[]>;
     get(id: string, options?: any): Promise<IFile>;
+    getByPath(path: string): Promise<IFile>;
     removeAll(): Promise<void>;
     count(): Promise<number>;
 }
@@ -40,5 +41,4 @@ export interface IFileStore {
     create(asset: IFile, stream: Readable, options?: any): Promise<IFile>;
     remove(asset: IFile): Promise<IFile>;
     stream(asset: IFile, options?: any): Promise<Readable>;
-    has(asset: IFile): Promise<boolean>;
 }

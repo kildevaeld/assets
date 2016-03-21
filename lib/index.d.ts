@@ -60,6 +60,7 @@ export declare class Assets extends EventEmitter {
      * @return Promise<Asset>
      */
     getByPath(path: string): Promise<Asset>;
+    has(path: string): Promise<boolean>;
     query(term: string): Promise<Asset[]>;
     remove(asset: Asset, options?: any): Promise<void>;
     list(options?: IListOptions): Promise<Asset[]>;

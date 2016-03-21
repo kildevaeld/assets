@@ -92,9 +92,9 @@ export class S3FileStore implements IFileStore {
         return await this._getStream(path)
     }
     
-    async has(asset: IFile): Promise<boolean> {
+    /*async has(asset: IFile): Promise<boolean> {
         
-    }
+    }*/
     
     
     private async _putStream (stream: Readable, dest:string,  headers?:any): Promise<http.IncomingMessage> {

@@ -81,6 +81,14 @@ export class FileMetaStore implements IMetaStore {
         return this.files[id];
     }
     
+    getByPath (path: string): Promise<IFile> {
+        for (let key in this.files) {
+            let fp = Path.join(this.files[key].path, this.files[key].filename);
+            if (fp === path) return Promise.resolve(this.files[key]);
+        }
+        return Promise.resolve(null);
+    }
+    
     async removeAll(): Promise<void> {
         this.files = {};
         await this._save();
@@ -89,6 +97,7 @@ export class FileMetaStore implements IMetaStore {
     async count(): Promise<number> {
         return Object.keys(this.files).length;
     }
+    
     
     private async _initPath (path:string): Promise<void> {
         

@@ -9,8 +9,8 @@ export function observe(target, key: string, descriptor: PropertyDescriptor) {
     descriptor.set = function (value) {
         let oldValue = this[key];
         oset.call(this, value);
-        if (typeof this.trigger === 'function') {
-            this.trigger('change:' + key, oldValue, value);
+        if (typeof this.emit === 'function') {
+            this.emit('change:' + key, oldValue, value);
         }
     }
 }
