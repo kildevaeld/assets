@@ -28,7 +28,10 @@ export enum Hook {
     BeforeCreate,
     Create,
     BeforeRemove,
-    Remove
+    Remove,
+    BeforeList,
+    BeforeStream,
+    BeforeThumbnail
 }
 
 function isString(a:any): a is String {
@@ -134,6 +137,7 @@ export class Assets extends EventEmitter {
     }
     
     async thumbnail (asset:Asset): Promise<Readable> {
+        this._runHook(Hook.BeforeList, asset);
         let stream = await this.thumbnailer.request(asset);
         return stream;
     }
@@ -281,7 +285,7 @@ export class Assets extends EventEmitter {
     }
 
     async list(options?: IListOptions): Promise<Asset[]> {
-
+        this._runHook(Hook.BeforeList, null, null, options);
         let infos = await this.metaStore.list(options);
 
         if (!infos.length) return <Asset[]>infos;
@@ -295,7 +299,8 @@ export class Assets extends EventEmitter {
 
     }
 
-    async stream(asset: IFile): Promise<Readable> {
+    async stream(asset: Asset): Promise<Readable> {
+        this._runHook(Hook.BeforeStream, asset);
         return await this.fileStore.stream(asset);
     }
 
