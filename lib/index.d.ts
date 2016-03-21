@@ -11,7 +11,7 @@ export declare enum Hook {
     Remove = 3,
 }
 export interface HookFunc {
-    (asset: Asset, fn?: () => Promise<Readable>): Promise<void>;
+    (asset: Asset, fn?: () => Promise<Readable>, options?: any): Promise<void>;
 }
 export interface MimeFunc {
     (asset: Asset, fn?: () => Promise<Readable>): Promise<void>;
@@ -58,14 +58,14 @@ export declare class Assets extends EventEmitter {
      */
     getByPath(path: string): Promise<Asset>;
     query(term: string): Promise<Asset[]>;
-    remove(asset: Asset): Promise<void>;
+    remove(asset: Asset, options?: any): Promise<void>;
     list(options?: IListOptions): Promise<Asset[]>;
     stream(asset: IFile): Promise<Readable>;
     use(mime: string | MimeFunc, fn?: MimeFunc): this;
     registerHook(hook: Hook, fn: HookFunc): string;
     unregister(hook: Hook, fn: HookFunc | string): void;
     private _createTemp(stream, path);
-    private _runHook(hook, asset, fn?);
+    private _runHook(hook, asset, fn?, options?);
     private _runHandlers(asset);
     private _writeFile(stream, path);
 }

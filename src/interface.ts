@@ -32,10 +32,10 @@ export interface IFindOptions extends IListOptions {
 export interface IMetaStore {
     initialize(): Promise<void>
     create(asset: IFile, options?: ICreateOptions): Promise<IFile>;
-    remove(asset: IFile): Promise<IFile>;
+    remove(asset: IFile, options?: any): Promise<IFile>;
     list(options?: IListOptions): Promise<IFile[]>;
     find(options?: IFindOptions): Promise<IFile[]>;
-    get(id: string): Promise<IFile>;
+    get(id: string, options?:any): Promise<IFile>;
     removeAll(): Promise<void>;
     count (): Promise<number>;
 }
@@ -44,6 +44,6 @@ export interface IFileStore {
     initialize(): Promise<void>
     create(asset: IFile, stream: Readable, options?:any): Promise<IFile>;
     remove(asset: IFile): Promise<IFile>;
-    stream(asset: IFile): Promise<Readable>;
+    stream(asset: IFile, options?:any): Promise<Readable>;
     has(asset: IFile): Promise<boolean>;
 }

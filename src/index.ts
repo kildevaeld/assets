@@ -36,7 +36,7 @@ function isString(a:any): a is String {
 }
 
 export interface HookFunc {
-    (asset: Asset, fn?: () => Promise<Readable>): Promise<void>;
+    (asset: Asset, fn?: () => Promise<Readable>, options?:any): Promise<void>;
 }
 
 type hook_tuple = [string, HookFunc]; 
@@ -197,7 +197,7 @@ export class Assets extends EventEmitter {
                 tmpFile = await self._createTemp(stream, path);
             }
             return fs.createReadStream(tmpFile);
-        });
+        }, options);
 
         if (tmpFile) {
             stream = fs.createReadStream(tmpFile);
@@ -217,7 +217,7 @@ export class Assets extends EventEmitter {
 
         clean();
 
-        this._runHook(Hook.Create, asset);
+        this._runHook(Hook.Create, asset, null, options);
 
         return asset;
     }
@@ -268,15 +268,15 @@ export class Assets extends EventEmitter {
     
    
 
-    async remove(asset: Asset): Promise<void> {
+    async remove(asset: Asset, options?: any): Promise<void> {
         
         if ((await this.getById(asset.id)) == null) {
             return null;
         }
-        this._runHook(Hook.BeforeRemove, asset)
+        this._runHook(Hook.BeforeRemove, asset, options)
         await this.fileStore.remove(asset);
         await this.metaStore.remove(asset);
-        this._runHook(Hook.Remove, asset)
+        this._runHook(Hook.Remove, asset, null, options)
 
     }
 
@@ -329,6 +329,7 @@ export class Assets extends EventEmitter {
         for (let i = 0, ii = hooks.length; i < ii; i++) {
             if (hooks[i][0] === fn || hooks[i][1] === fn) {
                 hooks.splice(i, 1);
+                break;
             }
         }
         
@@ -341,13 +342,13 @@ export class Assets extends EventEmitter {
         return tmpFile
     }
 
-    private async _runHook(hook: Hook, asset: Asset, fn?: () => Promise<Readable>): Promise<void> {
+    private async _runHook(hook: Hook, asset: Asset, fn?: () => Promise<Readable>, options?:any): Promise<void> {
         let hooks: hook_tuple[] = this._hooks.get(hook);
         if (!hooks) return;
         debug("run hook %s (%d)", Hook[hook], hooks.length);
         for (let i = 0, ii = hooks.length; i < ii; i++) {
             debug("run hook id %s", hooks[i][0]);
-            await hooks[i][1](asset, fn);
+            await hooks[i][1](asset, fn, options);
         }
     }
     
