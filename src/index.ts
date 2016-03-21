@@ -208,11 +208,11 @@ export class Assets extends EventEmitter {
             stream = fs.createReadStream(tmpFile);
         }
 
-        await this.fileStore.create(asset, stream);
+        await this.fileStore.create(asset, stream, options);
 
         if (!options.skipMeta) {
             try {
-                await this.metaStore.create(asset);
+                await this.metaStore.create(asset, options);
             } catch (e) {
                 await this.fileStore.remove(asset);
                 clean();
