@@ -69,6 +69,7 @@ export interface AssetCreateOptions {
     hidden?:boolean;
     skipMeta?: boolean;
     meta?:{[key: string]: any};
+    path?: string;
 }
 
 export class Assets extends EventEmitter {
@@ -186,30 +187,50 @@ export class Assets extends EventEmitter {
             options.mime = mime;
             options.size = stats.size
         }
-
+        
+        let dirPath = Path.dirname(path);
+        //console.log(dirPath, options.path);
+        //if (options.path) dirPath = Path.join(options.path, dirPath);
+        if (options.path) dirPath = options.path;
+        
+        
         let asset = new Asset({
             name: options.name||filename,
-            path: Path.dirname(path),
+            path: dirPath,
             filename: filename,
             mime: options.mime,
             size: options.size,
             hidden: options.hidden,
             meta: options.meta || {}
         });
-
-        var self = this;
-        this._runHook(Hook.BeforeCreate, asset, async function(): Promise<Readable> {
+        
+        
+        const createFn = async (): Promise<Readable> {
             if (!tmpFile) {
-                tmpFile = await self._createTemp(stream, path);
+                tmpFile = await this._createTemp(stream, path);
             }
             return fs.createReadStream(tmpFile);
-        }, options);
+        }
+
+        var self = this;
+        this._runHook(Hook.BeforeCreate, asset, createFn, options);
 
         if (tmpFile) {
             stream = fs.createReadStream(tmpFile);
         }
+        
+        if (asset.path[asset.path.length - 1] !== '/') asset.path += '/';
+                
 
         await this.fileStore.create(asset, stream, options);
+        
+        try {
+            await this._runHandlers(asset, () => {
+                return this.stream(asset);
+            });
+        } catch (e) {
+            debug('error %s', e);
+        }
 
         if (!options.skipMeta) {
             try {
@@ -222,7 +243,7 @@ export class Assets extends EventEmitter {
         }
 
         clean();
-
+        debug('create %j', asset);
         this._runHook(Hook.Create, asset, null, options);
 
         return asset;
@@ -369,10 +390,10 @@ export class Assets extends EventEmitter {
         }
     }
     
-    private async _runHandlers(asset:Asset): Promise<void> {
+    private async _runHandlers(asset:Asset, fn?: () => Promise<Readable>): Promise<void> {
         for (let i = 0, ii = this._mimeHandlers.length; i < ii; i++ ) {
             if (this._mimeHandlers[i].r.test(asset.mime)) {
-                await this._mimeHandlers[i].f(asset);
+                await this._mimeHandlers[i].f(asset, fn);
             }
         }
     }

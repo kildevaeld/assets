@@ -3,6 +3,7 @@ import {Readable} from 'stream';
 import {IFile} from './interface';
 import {Assets, Hook} from './index';
 import * as Debug from 'debug';
+import {Asset} from './asset';
 
 const debug = Debug("assets:thumbnailer");
 
@@ -53,7 +54,7 @@ export class Thumbnailer {
 
 
     async request(asset: IFile, options?:any): Promise<Readable> {
-        if ((await this.has(asset))) {
+        if ((await this.has(asset, options))) {
             let path = thumbName(asset.filename);
             debug('request %s', path)
             let stream = await this._assets.stream(<any>{
@@ -79,7 +80,7 @@ export class Thumbnailer {
             let fp = Path.join(asset.path, path);
             
             debug('thumbname %s', path)
-            if (await this._assets.has(fp)) {
+            if (await this._assets.has(fp, options)) {
                 debug('already have thumbnail')
                 return true;
             }
@@ -117,6 +118,10 @@ export class Thumbnailer {
 
         let {stream, info} = await generator(rs);
 
+        if (info instanceof Asset) {
+            info = (<any>info).toJSON();
+        }
+
         info.path = asset.path;
         info.filename = filename
         info.hidden = true;
@@ -129,8 +134,7 @@ export class Thumbnailer {
         let path = Path.join(info.path, info.filename)
         
         if (stream && info) {
-            await this._assets.create(stream, path, info);
-            return info;
+            return await this._assets.create(stream, path, info);
         } else {
             return null;
         }
@@ -138,7 +142,8 @@ export class Thumbnailer {
     }
 
     private async _onAssetRemove(asset: IFile): Promise<void> {
-        if (asset.meta && asset.meta['destroyed']) return;
+        if (!asset) return;
+        if (asset.meta && asset.meta['destroyed'] === true) return;
         
         let path = thumbName(asset.filename);
     

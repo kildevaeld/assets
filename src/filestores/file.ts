@@ -67,7 +67,7 @@ export class FileStoreFileSystem implements IFileStore {
             return null; 
         }
         let fp = this._getPath(asset);
-        debug('CREATE CREATE %s', fp)
+        debug('stream %s', fp);
         return fs.createReadStream(fp);
     }
     async has(asset: IFile): Promise<boolean> {
@@ -87,7 +87,7 @@ export class FileStoreFileSystem implements IFileStore {
             return Path.join(this.opts.path, asset);
         }
         let a = <IFile>asset;
-        debug('get path %j', asset);
+        
         return Path.join(this.opts.path, a.path, a.filename);
     }
     

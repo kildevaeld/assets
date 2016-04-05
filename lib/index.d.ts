@@ -36,6 +36,7 @@ export interface AssetCreateOptions {
     meta?: {
         [key: string]: any;
     };
+    path?: string;
 }
 export declare class Assets extends EventEmitter {
     protected _metaStore: IMetaStore;
@@ -73,6 +74,6 @@ export declare class Assets extends EventEmitter {
     unregister(hook: Hook, fn: HookFunc | string): void;
     private _createTemp(stream, path);
     private _runHook(hook, asset, fn?, options?);
-    private _runHandlers(asset);
+    private _runHandlers(asset, fn?);
     private _writeFile(stream, path);
 }

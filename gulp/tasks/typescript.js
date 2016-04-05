@@ -6,6 +6,9 @@ const gulp = require('gulp'),
     tsc = require('gulp-typescript'),
     babel = require('gulp-babel'),
     merge = require('merge2');
+    
+var sourcemaps = require('gulp-sourcemaps');
+
 
 const project = tsc.createProject('tsconfig.json')
 
@@ -16,6 +19,7 @@ gulp.task('protobuf', () => {
 
 gulp.task('typescript', () => {
     let result = project.src()
+    .pipe(sourcemaps.init())
     .pipe(tsc(project))
     
     let js = result.js.pipe(babel({
@@ -24,7 +28,7 @@ gulp.task('typescript', () => {
     
     return merge([
         result.dts.pipe(gulp.dest('lib')),
-        js.pipe(gulp.dest('lib'))
+        js.pipe(sourcemaps.write()).pipe(gulp.dest('lib'))
     ])
     .pipe(gulp.dest('lib'))
 })
