@@ -3,7 +3,7 @@
 import {EventEmitter} from 'events';
 import {Readable} from 'stream';
 import {getFileStore, getMetaStore} from './repository';
-import {IFile, IMetaStore, IFileStore, IListOptions} from './interface';
+import {IFile, IMetaStore, IFileStore, IListOptions, IFindOptions} from './interface';
 import {Thumbnailer} from './thumbnailer';
 import {Asset} from './asset';
 import {randomName, getFileStats, getMimeType, writeStream} from './utils';
@@ -264,10 +264,11 @@ export class Assets extends EventEmitter {
         });
     }
     
-    async query(term: string): Promise<Asset[]> {
-        return (await this.metaStore.find({
-            path: term
-        })).map( a => {
+    async query(term: string, options?: IFindOptions): Promise<Asset[]> {
+        options = options||<any>{};
+        options.path = term;
+        
+        return (await this.metaStore.find(options)).map( a => {
             if (a instanceof Asset) {
                 return a;
             }

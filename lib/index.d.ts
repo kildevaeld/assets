@@ -1,7 +1,7 @@
 /// <reference path="../typings/main.d.ts" />
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
-import { IFile, IMetaStore, IFileStore, IListOptions } from './interface';
+import { IFile, IMetaStore, IFileStore, IListOptions, IFindOptions } from './interface';
 import { Thumbnailer } from './thumbnailer';
 import { Asset } from './asset';
 export declare enum Hook {
@@ -61,7 +61,7 @@ export declare class Assets extends EventEmitter {
      */
     getByPath(path: string): Promise<Asset>;
     has(path: string): Promise<boolean>;
-    query(term: string): Promise<Asset[]>;
+    query(term: string, options?: IFindOptions): Promise<Asset[]>;
     remove(asset: Asset, options?: any): Promise<void>;
     list(options?: IListOptions): Promise<Asset[]>;
     stream(asset: Asset): Promise<Readable>;
