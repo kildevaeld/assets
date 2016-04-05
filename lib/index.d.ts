@@ -47,7 +47,7 @@ export declare class Assets extends EventEmitter {
     private _mimeHandlers;
     constructor(options: AssetsOptions);
     initialize(): Promise<void>;
-    thumbnail(asset: Asset, options: any): Promise<Readable>;
+    thumbnail(asset: Asset, options?: any): Promise<Readable>;
     canThumbnail(asset: Asset): boolean;
     createFromPath(path: string, dest: string, options?: AssetCreateOptions): Promise<IFile>;
     create(stream: Readable, path: string, options?: AssetCreateOptions): Promise<IFile>;

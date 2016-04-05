@@ -135,11 +135,10 @@ export class Assets extends EventEmitter {
             this.thumbnailer.initialize(this)
         ]);
 
-
     }
     
-    async thumbnail (asset:Asset, options:any): Promise<Readable> {
-        this._runHook(Hook.BeforeThumbnail, asset, options);
+    async thumbnail (asset:Asset, options?:any): Promise<Readable> {
+        this._runHook(Hook.BeforeThumbnail, asset, null, options);
         let stream = await this.thumbnailer.request(asset, options);
         return stream;
     }
