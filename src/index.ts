@@ -31,7 +31,8 @@ export enum Hook {
     Remove,
     BeforeList,
     BeforeStream,
-    BeforeThumbnail
+    BeforeThumbnail,
+    BeforeGet
 }
 
 function isString(a:any): a is String {
@@ -136,9 +137,9 @@ export class Assets extends EventEmitter {
 
     }
     
-    async thumbnail (asset:Asset): Promise<Readable> {
-        this._runHook(Hook.BeforeList, asset);
-        let stream = await this.thumbnailer.request(asset);
+    async thumbnail (asset:Asset, options:any): Promise<Readable> {
+        this._runHook(Hook.BeforeThumbnail, asset, options);
+        let stream = await this.thumbnailer.request(asset, options);
         return stream;
     }
     
@@ -231,8 +232,8 @@ export class Assets extends EventEmitter {
      * @param {string} id The id
      * @return Promise<Asset>
      */
-    async getById(id: string): Promise<Asset> {
-        let info = await this.metaStore.get(id);
+    async getById(id: string, options?:any): Promise<Asset> {
+        let info = await this.metaStore.get(id, options);
         if (!(info instanceof Asset)) {
             info = new Asset(info);
         }
@@ -244,9 +245,9 @@ export class Assets extends EventEmitter {
      * @param {string} path The full path to the file
      * @return Promise<Asset>
      */
-    getByPath(path: string): Promise<Asset> {
+    getByPath(path: string, options?:any): Promise<Asset> {
         
-        return this.metaStore.getByPath(path)
+        return this.metaStore.getByPath(path, options)
         .then( asset => {
             if (asset) {
                 if (!(asset instanceof Asset)) asset = new Asset(asset);
@@ -257,8 +258,8 @@ export class Assets extends EventEmitter {
         
     }
     
-    has(path: string): Promise<boolean> {
-        return this.getByPath(path)
+    has(path: string, options?:any): Promise<boolean> {
+        return this.getByPath(path, options)
         .then( a => {
             return a != null;
         });
@@ -280,7 +281,7 @@ export class Assets extends EventEmitter {
 
     async remove(asset: Asset, options?: any): Promise<void> {
         
-        if ((await this.getById(asset.id)) == null) {
+        if ((await this.getById(asset.id, options)) == null) {
             return null;
         }
         this._runHook(Hook.BeforeRemove, asset, options)

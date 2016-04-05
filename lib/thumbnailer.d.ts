@@ -15,9 +15,9 @@ export declare class Thumbnailer {
     static getGenerator(mime: string): ThumbnailGenerator;
     constructor(options?: ThumbnailerOptions);
     initialize(assets: Assets): Promise<void>;
-    request(asset: IFile): Promise<Readable>;
-    has(asset: IFile): Promise<boolean>;
+    request(asset: IFile, options?: any): Promise<Readable>;
+    has(asset: IFile, options?: any): Promise<boolean>;
     canThumbnail(mime: string): boolean;
-    private _generateThumbnail(asset, filename);
+    private _generateThumbnail(asset, filename, options?);
     private _onAssetRemove(asset);
 }

@@ -52,11 +52,11 @@ export class Thumbnailer {
 
 
 
-    async request(asset: IFile): Promise<Readable> {
+    async request(asset: IFile, options?:any): Promise<Readable> {
         if ((await this.has(asset))) {
             let path = thumbName(asset.filename);
             debug('request %s', path)
-            let stream = await this._assets.fileStore.stream(<any>{
+            let stream = await this._assets.stream(<any>{
                 filename: path,
                 path: asset.path
             });
@@ -66,7 +66,7 @@ export class Thumbnailer {
         return null;
     }
 
-    async has(asset: IFile): Promise<boolean> {
+    async has(asset: IFile, options?:any): Promise<boolean> {
         if (!(await this.canThumbnail(asset.mime))) return false;
         
         if (asset.meta && asset.meta['thumbnail'] === true) {
@@ -84,7 +84,7 @@ export class Thumbnailer {
                 return true;
             }
             
-            let info = await this._generateThumbnail(asset, path);
+            let info = await this._generateThumbnail(asset, path, options);
 
             if (info == null) {
                 debug('info is null')
@@ -105,13 +105,13 @@ export class Thumbnailer {
         return !!_generators[mime];
     }
 
-    private async _generateThumbnail(asset: IFile, filename: string): Promise<IFile> {
+    private async _generateThumbnail(asset: IFile, filename: string, options?:any): Promise<IFile> {
 
         let generator = Thumbnailer.getGenerator(asset.mime);
 
         if (!generator) throw new Error("no thumbnailer");
 
-        let rs = await this._assets.stream(asset);
+        let rs = await this._assets.stream(<any>asset);
 
         if (!rs) throw new Error('no stream');
 
@@ -121,6 +121,10 @@ export class Thumbnailer {
         info.filename = filename
         info.hidden = true;
         info.meta['thumbnail'] = true
+        
+        if (options) {
+            info = Object.assign({}, info, options);
+        }
         
         let path = Path.join(info.path, info.filename)
         

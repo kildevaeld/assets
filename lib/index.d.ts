@@ -12,6 +12,7 @@ export declare enum Hook {
     BeforeList = 4,
     BeforeStream = 5,
     BeforeThumbnail = 6,
+    BeforeGet = 7,
 }
 export interface HookFunc {
     (asset: Asset, fn?: () => Promise<Readable>, options?: any): Promise<void>;
@@ -45,7 +46,7 @@ export declare class Assets extends EventEmitter {
     private _mimeHandlers;
     constructor(options: AssetsOptions);
     initialize(): Promise<void>;
-    thumbnail(asset: Asset): Promise<Readable>;
+    thumbnail(asset: Asset, options: any): Promise<Readable>;
     canThumbnail(asset: Asset): boolean;
     createFromPath(path: string, dest: string, options?: AssetCreateOptions): Promise<IFile>;
     create(stream: Readable, path: string, options?: AssetCreateOptions): Promise<IFile>;
@@ -53,14 +54,14 @@ export declare class Assets extends EventEmitter {
      * @param {string} id The id
      * @return Promise<Asset>
      */
-    getById(id: string): Promise<Asset>;
+    getById(id: string, options?: any): Promise<Asset>;
     /**
      * Get an asset by full path
      * @param {string} path The full path to the file
      * @return Promise<Asset>
      */
-    getByPath(path: string): Promise<Asset>;
-    has(path: string): Promise<boolean>;
+    getByPath(path: string, options?: any): Promise<Asset>;
+    has(path: string, options?: any): Promise<boolean>;
     query(term: string, options?: IFindOptions): Promise<Asset[]>;
     remove(asset: Asset, options?: any): Promise<void>;
     list(options?: IListOptions): Promise<Asset[]>;

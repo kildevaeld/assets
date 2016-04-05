@@ -36,7 +36,7 @@ export interface IMetaStore {
     list(options?: IListOptions): Promise<IFile[]>;
     find(options?: IFindOptions): Promise<IFile[]>;
     get(id: string, options?:any): Promise<IFile>;
-    getByPath(path: string): Promise<IFile>;
+    getByPath(path: string, options?:any): Promise<IFile>;
     removeAll(): Promise<void>;
     count (): Promise<number>;
 }
