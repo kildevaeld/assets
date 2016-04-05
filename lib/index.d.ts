@@ -13,6 +13,7 @@ export declare enum Hook {
     BeforeStream = 5,
     BeforeThumbnail = 6,
     BeforeGet = 7,
+    BeforeCount = 8,
 }
 export interface HookFunc {
     (asset: Asset, fn?: () => Promise<Readable>, options?: any): Promise<void>;
@@ -65,7 +66,8 @@ export declare class Assets extends EventEmitter {
     query(term: string, options?: IFindOptions): Promise<Asset[]>;
     remove(asset: Asset, options?: any): Promise<void>;
     list(options?: IListOptions): Promise<Asset[]>;
-    stream(asset: Asset): Promise<Readable>;
+    stream(asset: Asset, options?: any): Promise<Readable>;
+    count(options?: IFindOptions): Promise<number>;
     use(mime: string | MimeFunc, fn?: MimeFunc): this;
     registerHook(hook: Hook, fn: HookFunc): string;
     unregister(hook: Hook, fn: HookFunc | string): void;

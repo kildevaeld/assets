@@ -32,7 +32,8 @@ export enum Hook {
     BeforeList,
     BeforeStream,
     BeforeThumbnail,
-    BeforeGet
+    BeforeGet,
+    BeforeCount
 }
 
 function isString(a:any): a is String {
@@ -284,7 +285,7 @@ export class Assets extends EventEmitter {
         if ((await this.getById(asset.id, options)) == null) {
             return null;
         }
-        this._runHook(Hook.BeforeRemove, asset, options)
+        await this._runHook(Hook.BeforeRemove, asset, options)
         await this.fileStore.remove(asset);
         await this.metaStore.remove(asset);
         this._runHook(Hook.Remove, asset, null, options)
@@ -292,7 +293,7 @@ export class Assets extends EventEmitter {
     }
 
     async list(options?: IListOptions): Promise<Asset[]> {
-        this._runHook(Hook.BeforeList, null, null, options);
+        await this._runHook(Hook.BeforeList, null, null, options);
         let infos = await this.metaStore.list(options);
 
         if (!infos.length) return <Asset[]>infos;
@@ -306,9 +307,14 @@ export class Assets extends EventEmitter {
 
     }
 
-    async stream(asset: Asset): Promise<Readable> {
-        this._runHook(Hook.BeforeStream, asset);
+    async stream(asset: Asset, options?:any): Promise<Readable> {
+        await this._runHook(Hook.BeforeStream, asset, null, options);
         return await this.fileStore.stream(asset);
+    }
+    
+    async count(options?:IFindOptions): Promise<number> {
+       await this._runHook(Hook.BeforeCount, null, null, options);
+       return await this.metaStore.count(options);
     }
 
     use(mime:string|MimeFunc, fn?:MimeFunc) {
