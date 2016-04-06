@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 import { IFile } from './interface';
 import { Assets } from './index';
+export declare const ThumbnailMetaKey: string;
 export interface ThumbnailGenerator {
     (stream: Readable): Promise<{
         stream: Readable;
@@ -17,6 +18,7 @@ export declare class Thumbnailer {
     initialize(assets: Assets): Promise<void>;
     request(asset: IFile, options?: any): Promise<Readable>;
     has(asset: IFile, options?: any): Promise<boolean>;
+    generateThumbnail(asset: IFile, options?: any): Promise<IFile>;
     canThumbnail(mime: string): boolean;
     private _generateThumbnail(asset, filename, options?);
     private _onAssetRemove(asset);

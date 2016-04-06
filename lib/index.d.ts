@@ -47,7 +47,7 @@ export declare class Assets extends EventEmitter {
     private _hooks;
     private _mimeHandlers;
     constructor(options: AssetsOptions);
-    initialize(): Promise<void>;
+    initialize(): Promise<void[]>;
     thumbnail(asset: Asset, options?: any): Promise<Readable>;
     canThumbnail(asset: Asset): boolean;
     createFromPath(path: string, dest: string, options?: AssetCreateOptions): Promise<IFile>;
@@ -72,8 +72,6 @@ export declare class Assets extends EventEmitter {
     use(mime: string | MimeFunc, fn?: MimeFunc): this;
     registerHook(hook: Hook, fn: HookFunc): string;
     unregister(hook: Hook, fn: HookFunc | string): void;
-    private _createTemp(stream, path);
     private _runHook(hook, asset, fn?, options?);
     private _runHandlers(asset, fn?);
-    private _writeFile(stream, path);
 }

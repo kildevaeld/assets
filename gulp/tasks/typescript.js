@@ -12,10 +12,6 @@ var sourcemaps = require('gulp-sourcemaps');
 
 const project = tsc.createProject('tsconfig.json')
 
-gulp.task('protobuf', () => {
-    return gulp.src('src/rpc/messages/*')
-    .pipe(gulp.dest('lib/rpc/messages'))
-})
 
 gulp.task('typescript', () => {
     let result = project.src()

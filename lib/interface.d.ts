@@ -42,3 +42,9 @@ export interface IFileStore {
     remove(asset: IFile): Promise<IFile>;
     stream(asset: IFile, options?: any): Promise<Readable>;
 }
+export declare class AssetsError extends Error {
+    message: string;
+    constructor(message: string);
+}
+export declare class ThumbnailError extends AssetsError {
+}

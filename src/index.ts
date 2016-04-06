@@ -6,17 +6,13 @@ import {getFileStore, getMetaStore} from './repository';
 import {IFile, IMetaStore, IFileStore, IListOptions, IFindOptions} from './interface';
 import {Thumbnailer} from './thumbnailer';
 import {Asset} from './asset';
-import {randomName, getFileStats, getMimeType, writeStream} from './utils';
+import {randomName, getFileStats, getMimeType, writeStream, normalizeFileName, normalizePath,createTemp} from './utils';
 import * as generators from './generators/index';
 import * as Path from 'path';
 import * as os from 'os';
 import * as fs from 'fs';
 import * as Debug from 'debug';
 
-
-
-
-const sanitize = require('sanitize-filename');
 const debug = Debug('assets');
 
 var idCounter = 0;
@@ -127,9 +123,9 @@ export class Assets extends EventEmitter {
 
     }
 
-    async initialize(): Promise<void> {
+    initialize(): Promise<void[]> {
 
-        await Promise.all([
+        return Promise.all([
             this.metaStore.initialize(),
             this.fileStore.initialize(),
             generators.initialize(),
@@ -152,7 +148,6 @@ export class Assets extends EventEmitter {
     async createFromPath(path: string, dest: string, options: AssetCreateOptions = { skipMeta: false }) {
         
         let stat = await getFileStats(path);
-        
         if (!stat.isFile()) throw new Error('not a file');
         
         let reader = fs.createReadStream(path);
@@ -172,14 +167,14 @@ export class Assets extends EventEmitter {
 
         
         let filename = Path.basename(path);
-        filename = sanitize(filename.replace(/[^a-z0-9\-\.]/gi, '_'));
+        filename = normalizeFileName(filename);
         
 
         // If mime or size isnt provided, we have to get it
         // the hard way
         if ((!options.mime || !options.size) || (options.mime === "" || options.size === 0)) {
 
-            tmpFile = await this._createTemp(stream, path);
+            tmpFile = await createTemp(stream, path);
 
             let stats = await getFileStats(tmpFile);
             let mime = getMimeType(tmpFile);
@@ -188,15 +183,13 @@ export class Assets extends EventEmitter {
             options.size = stats.size
         }
         
-        let dirPath = Path.dirname(path);
-        //console.log(dirPath, options.path);
-        //if (options.path) dirPath = Path.join(options.path, dirPath);
+        let dirPath = Path.dirname(path); 
         if (options.path) dirPath = options.path;
         
         
         let asset = new Asset({
             name: options.name||filename,
-            path: dirPath,
+            path: normalizePath(dirPath),
             filename: filename,
             mime: options.mime,
             size: options.size,
@@ -205,14 +198,15 @@ export class Assets extends EventEmitter {
         });
         
         
-        const createFn = async (): Promise<Readable> {
+        const createFn = async (): Promise<Readable> => {
             if (!tmpFile) {
-                tmpFile = await this._createTemp(stream, path);
+                tmpFile = await createTemp(stream, path);
             }
             return fs.createReadStream(tmpFile);
-        }
+        };
+        
 
-        var self = this;
+        // Run before create hook, 
         this._runHook(Hook.BeforeCreate, asset, createFn, options);
 
         if (tmpFile) {
@@ -229,7 +223,7 @@ export class Assets extends EventEmitter {
                 return this.stream(asset);
             });
         } catch (e) {
-            debug('error %s', e);
+            debug('could not run handler for "%s", got error: %s', asset.mime, e);
         }
 
         if (!options.skipMeta) {
@@ -306,14 +300,18 @@ export class Assets extends EventEmitter {
             return null;
         }
         await this._runHook(Hook.BeforeRemove, asset, options)
+        
         await this.fileStore.remove(asset);
         await this.metaStore.remove(asset);
-        this._runHook(Hook.Remove, asset, null, options)
+        
+        await this._runHook(Hook.Remove, asset, null, options)
 
     }
 
     async list(options?: IListOptions): Promise<Asset[]> {
+        
         await this._runHook(Hook.BeforeList, null, null, options);
+        
         let infos = await this.metaStore.list(options);
 
         if (!infos.length) return <Asset[]>infos;
@@ -347,6 +345,7 @@ export class Assets extends EventEmitter {
             r: new RegExp(<string>mime, 'i'),
             f: fn
         });
+        
         return this;
     }
 
@@ -373,13 +372,6 @@ export class Assets extends EventEmitter {
         
     }
 
-    private async _createTemp(stream: Readable, path: string): Promise<string> {
-        let rnd = await randomName(path);
-        let tmpFile = Path.join(os.tmpdir(), rnd);
-        await this._writeFile(stream, tmpFile);
-        return tmpFile
-    }
-
     private async _runHook(hook: Hook, asset: Asset, fn?: () => Promise<Readable>, options?:any): Promise<void> {
         let hooks: hook_tuple[] = this._hooks.get(hook);
         if (!hooks) return;
@@ -398,15 +390,4 @@ export class Assets extends EventEmitter {
         }
     }
 
-    private async _writeFile(stream: Readable, path: string): Promise<void> {
-        return new Promise<void>(function(resolve, reject) {
-            var ws = fs.createWriteStream(path);
-            ws.on('finish', resolve)
-                .on('error', reject);
-
-            stream.on('error', reject);
-
-            stream.pipe(ws);
-        });
-    }
 }

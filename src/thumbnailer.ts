@@ -1,11 +1,13 @@
 import * as Path from 'path';
 import {Readable} from 'stream';
-import {IFile} from './interface';
+import {IFile, ThumbnailError} from './interface';
 import {Assets, Hook} from './index';
 import * as Debug from 'debug';
 import {Asset} from './asset';
 
 const debug = Debug("assets:thumbnailer");
+
+export const ThumbnailMetaKey = "$thumbnail";
 
 export interface ThumbnailGenerator {
     (stream: Readable): Promise<{ stream: Readable, info: IFile }>
@@ -51,6 +53,7 @@ export class Thumbnailer {
         assets.registerHook(Hook.Remove, this._onAssetRemove);
     }
 
+    
 
 
     async request(asset: IFile, options?:any): Promise<Readable> {
@@ -96,9 +99,47 @@ export class Thumbnailer {
 
         } catch (e) {
             debug('could not generate thumbnail ', e.message);
-            console.log(e.stack)
             return false;
         }
+    }
+    
+    async generateThumbnail(asset:IFile, options?:any): Promise<IFile> {
+        let tFileName = thumbName(asset.filename);
+        
+        if (asset.meta[ThumbnailMetaKey]) {
+            throw new ThumbnailError('Cannot not make a thumbnail of another thumbnail');
+        }
+        
+        let generator = Thumbnailer.getGenerator(asset.mime);
+        if (!generator) throw new ThumbnailError(`No generator for mimetype ${asset.mime}`);
+        
+        let rs = await this._assets.stream(<any>asset);
+        
+        if (rs) throw new ThumbnailError(`Could not stream ${asset.id}`);
+        
+        let {stream, info} = await generator(rs);
+        
+        if (!stream || !info) {
+            throw new ThumbnailError(`Could not generate thumbnail for ${info.mime} `)
+        }
+        
+        if (info instanceof Asset) {
+            info = (<any>info).toJSON();
+        }
+        
+        info.path = asset.path;
+        info.filename = tFileName;
+        info.hidden = true;
+        info.meta[ThumbnailMetaKey] = true;
+        
+        if (options) {
+            info = Object.assign({}, info, options);
+        }
+        
+        let fp = Path.join(info.path, info.filename);
+        
+        return await this._assets.create(stream, fp, info);
+        
     }
 
     canThumbnail(mime: string): boolean {
@@ -149,14 +190,14 @@ export class Thumbnailer {
     
         try {
             let thumbnail = await this._assets.getByPath(Path.join(asset.path,path));
-            if (thumbnail && thumbnail.meta['thumbnail'] === true) {
+            if (thumbnail && thumbnail.meta[ThumbnailMetaKey] === true) {
                 debug("removing thumbnail associated with %j", asset)
                 await this._assets.remove(<any>{path: asset.path, filename: path});    
                 asset.meta = { 'destroyed': true };
             }
             
         } catch (e) { 
-           console.log('could not remove thumnail %s', path, e) 
+           debug('could not remove thumnail %s', path, e) 
         }
         
     }

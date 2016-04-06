@@ -6,3 +6,7 @@ export declare function getFileStats(path: string): Promise<fs.Stats>;
 export declare function getMimeType(path: string): string;
 export declare function writeStream(stream: Readable, path: string): Promise<void>;
 export declare function pick(obj: any, args: string[]): any;
+export declare function normalizePath(path: string): string;
+export declare function normalizeFileName(filename: string): string;
+export declare function writeFile(stream: Readable, path: string): Promise<void>;
+export declare function createTemp(stream: Readable, path: string): Promise<string>;

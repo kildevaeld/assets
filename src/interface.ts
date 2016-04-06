@@ -48,3 +48,11 @@ export interface IFileStore {
     stream(asset: IFile, options?:any): Promise<Readable>;
     //has(asset: IFile): Promise<boolean>;
 }
+
+export class AssetsError extends Error {
+    constructor (public message:string) {
+        super(message);
+    }
+}
+
+export class ThumbnailError extends AssetsError {} 
