@@ -1,4 +1,4 @@
 
 const gulp = require('gulp');
 
-gulp.task('default', ['typescript', 'protobuf'])
+gulp.task('default', ['typescript'])
