@@ -12,8 +12,12 @@
                 padding: 10px;
             }
             .assets-gallery {
+                font-family: 'HelveticaNeue', Arial, Helvetica, sans-serif;
                 height:100vh;
                 
+            }
+            .gallery-toolbar {
+                background-color: #eee;
             }
             /*.gallery {
                 font-family: 'HelveticaNeue';
@@ -42,10 +46,16 @@
         
         <script>
             "use strict";
-            var gallery = new Assets.GalleryView({
-                url: '/files',
+            
+            var client = Assets.createClient({
+                url: '/files'
+            });
+            
+            var gallery = new Assets.GalleryView(client, {
+                uploadButton: true,
                 deleteable: true
             });
+            
             var container = document.getElementById('gallery');
             gallery.render().appendTo(container);
             
