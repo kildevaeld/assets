@@ -47,7 +47,7 @@ export class S3FileStore implements IFileStore {
         
     }
     
-    async create(asset: IFile, stream: Readable): Promise<IFile> {
+    async create(asset: IFile, stream: Readable, options?:any): Promise<IFile> {
         
         let headers = {
             'Content-Type': asset.mime,
@@ -91,10 +91,6 @@ export class S3FileStore implements IFileStore {
         let path = Path.join(asset.path, asset.filename)
         return await this._getStream(path)
     }
-    
-    /*async has(asset: IFile): Promise<boolean> {
-        
-    }*/
     
     
     private async _putStream (stream: Readable, dest:string,  headers?:any): Promise<http.IncomingMessage> {

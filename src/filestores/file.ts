@@ -27,7 +27,7 @@ export class FileStoreFileSystem implements IFileStore {
     }
     
     async create(asset: IFile, stream: Readable): Promise<IFile> {
-        //let bn = Path.dirname(asset.path),
+        
         let bnF = this._getPath(asset.path);
         try {
             let stats = await getFileStats(bnF);
@@ -35,12 +35,12 @@ export class FileStoreFileSystem implements IFileStore {
                 throw new Error("A files called " + asset.path + " already exists")
             }
         } catch (e) {
-            console.log(e)
+            debug("path %s does not exist, creating...", bnF)
             await mkdirp(bnF);
         }
         
         let fp = this._getPath(asset);
-        
+        debug('create %s', fp)
         await writeStream(stream, fp);
          
         return asset;
@@ -56,6 +56,7 @@ export class FileStoreFileSystem implements IFileStore {
                 await fs.unlink(path);
             }    
         } catch (e) {
+            debug('could not remove file at path: %s. Got error: %s', path, e.message);
             return null;
         }
         

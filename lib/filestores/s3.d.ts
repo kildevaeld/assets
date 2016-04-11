@@ -17,7 +17,7 @@ export declare class S3FileStore implements IFileStore {
     knox: any;
     constructor(options: S3FileStoreOptions);
     initialize(): Promise<void>;
-    create(asset: IFile, stream: Readable): Promise<IFile>;
+    create(asset: IFile, stream: Readable, options?: any): Promise<IFile>;
     remove(asset: IFile): Promise<IFile>;
     stream(asset: IFile): Promise<Readable>;
     private _putStream(stream, dest, headers?);
