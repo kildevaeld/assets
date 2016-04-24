@@ -9,7 +9,6 @@ const sanitize = require('sanitize-filename');
 
 
 export async function randomName(name?: string, len: number = 32, algo: string = 'sha1'): Promise<string> {
-
     let rnd = await crypto.randomBytes(len),
         rndString: string = crypto.createHash(algo).update(rnd.toString()).digest('hex');
 
@@ -80,7 +79,7 @@ export function writeFile(stream: Readable, path: string): Promise<void> {
     });
 }
 
-export async function createTemp(stream: Readable, path: string): Promise<string> {
+export async function writeToTempFile(stream: Readable, path: string): Promise<string> {
     let rnd = await randomName(path);
     let tmpFile = Path.join(os.tmpdir(), rnd);
     await writeFile(stream, tmpFile);

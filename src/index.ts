@@ -6,7 +6,7 @@ import {getFileStore, getMetaStore} from './repository';
 import {IFile, IMetaStore, IFileStore, IListOptions, IFindOptions} from './interface';
 import {Thumbnailer} from './thumbnailer';
 import {Asset} from './asset';
-import {randomName, getFileStats, getMimeType, writeStream, normalizeFileName, normalizePath, createTemp} from './utils';
+import {randomName, getFileStats, getMimeType, writeStream, normalizeFileName, normalizePath, writeToTempFile} from './utils';
 import * as generators from './generators/index';
 import * as Path from 'path';
 import * as os from 'os';
@@ -159,7 +159,15 @@ export class Assets extends EventEmitter {
 
     }
 
-    async create(stream: Readable, path: string, options: AssetCreateOptions = { skipMeta: false }): Promise<IFile> {
+    /**
+     * Create a new asset
+     * 
+     * @param {Readable} stream A readable stream
+     * @param {string} path The full destination path (path + filename)
+     * @param {AssetCreateOptions} [options={ skipMeta: false }] (description)
+     * @returns {Promise<Asset>} (description)
+     */
+    async create(stream: Readable, path: string, options: AssetCreateOptions = { skipMeta: false }): Promise<Asset> {
 
         let tmpFile;
 
@@ -173,8 +181,8 @@ export class Assets extends EventEmitter {
         // If mime or size isnt provided, we have to get it
         // the hard way
         if ((!options.mime || !options.size) || (options.mime === "" || options.size === 0)) {
-
-            tmpFile = await createTemp(stream, path);
+            debug('getting mime and size for asset')
+            tmpFile = await writeToTempFile(stream, path);
 
             let stats = await getFileStats(tmpFile);
             let mime = getMimeType(tmpFile);
@@ -200,7 +208,7 @@ export class Assets extends EventEmitter {
 
         const createFn = async (): Promise<Readable> => {
             if (!tmpFile) {
-                tmpFile = await createTemp(stream, path);
+                tmpFile = await writeToTempFile(stream, path);
             }
             return fs.createReadStream(tmpFile);
         };
@@ -261,7 +269,6 @@ export class Assets extends EventEmitter {
      * @return Promise<Asset>
      */
     getByPath(path: string, options?: any): Promise<Asset> {
-
         return this.metaStore.getByPath(path, options)
             .then(asset => {
                 if (asset) {
@@ -269,16 +276,23 @@ export class Assets extends EventEmitter {
                 }
                 return asset;
             });
-
-
     }
 
+    
+    /**
+     * Check if a given path exists
+     * 
+     * @param {string} path The full path to the asset (path/to/filename.ext)
+     * @param {*} [options] (description)
+     * @returns {Promise<boolean>} (description)
+     */
     has(path: string, options?: any): Promise<boolean> {
         return this.getByPath(path, options)
             .then(a => {
                 return a != null;
             });
     }
+
 
     async query(term: string, options?: IFindOptions): Promise<Asset[]> {
         options = options || <any>{};

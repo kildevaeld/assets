@@ -1,7 +1,7 @@
 /// <reference path="../typings/main.d.ts" />
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
-import { IFile, IMetaStore, IFileStore, IListOptions, IFindOptions } from './interface';
+import { IMetaStore, IFileStore, IListOptions, IFindOptions } from './interface';
 import { Thumbnailer } from './thumbnailer';
 import { Asset } from './asset';
 export declare enum Hook {
@@ -50,8 +50,16 @@ export declare class Assets extends EventEmitter {
     initialize(): Promise<void[]>;
     thumbnail(asset: Asset, options?: any): Promise<Readable>;
     canThumbnail(asset: Asset): boolean;
-    createFromPath(path: string, dest: string, options?: AssetCreateOptions): Promise<IFile>;
-    create(stream: Readable, path: string, options?: AssetCreateOptions): Promise<IFile>;
+    createFromPath(path: string, dest: string, options?: AssetCreateOptions): Promise<Asset>;
+    /**
+     * Create a new asset
+     *
+     * @param {Readable} stream A readable stream
+     * @param {string} path The full destination path (path + filename)
+     * @param {AssetCreateOptions} [options={ skipMeta: false }] (description)
+     * @returns {Promise<Asset>} (description)
+     */
+    create(stream: Readable, path: string, options?: AssetCreateOptions): Promise<Asset>;
     /** Get an asset by id
      * @param {string} id The id
      * @return Promise<Asset>
@@ -63,6 +71,13 @@ export declare class Assets extends EventEmitter {
      * @return Promise<Asset>
      */
     getByPath(path: string, options?: any): Promise<Asset>;
+    /**
+     * Check if a given path exists
+     *
+     * @param {string} path The full path to the asset (path/to/filename.ext)
+     * @param {*} [options] (description)
+     * @returns {Promise<boolean>} (description)
+     */
     has(path: string, options?: any): Promise<boolean>;
     query(term: string, options?: IFindOptions): Promise<Asset[]>;
     remove(asset: Asset, options?: any): Promise<void>;
