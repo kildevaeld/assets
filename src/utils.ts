@@ -59,6 +59,7 @@ export function pick(obj: any, args: string[]): any {
 export function normalizePath(path: string) {
     if (path[path.length - 1] !== '/') path += '/';
     if (path[0] !== '/') path = '/' + path;
+    if (path === ".") path = "/";
     return path;
 }
 
