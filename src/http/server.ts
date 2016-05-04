@@ -310,15 +310,17 @@ export class AssetsRouter {
 
         res.writeHead(status, {
             'Content-Type': 'application/json',
-            'Content-Length': str.length + ""
+            //'Content-Length': str.length + ""
         });
 
         return new Promise<void>((resolve, reject) => {
             res.write(str, (e) => {
                 if (e) return reject(e);
+                res.end();
                 resolve();
+                
             });
-            res.end();
+            //
         })
 
     }

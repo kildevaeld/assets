@@ -102,19 +102,20 @@ export class Assets extends EventEmitter {
 
         let meta: IMetaStore, file: IFileStore;
         if (isString(options.metaStore)) {
+            debug("using meta store: %s", options.metaStore);
             meta = getMetaStore(<string>options.metaStore, options.metaStoreOptions);
         } else {
             meta = <IMetaStore>options.metaStore;
         }
 
         if (isString(options.fileStore)) {
+            debug('using file store: %s', options.fileStore);
             file = getFileStore(<string>options.fileStore, options.fileStoreOptions);
         } else {
             file = <IFileStore>options.fileStore;
         }
 
         if (!meta || !file) {
-
             throw new Error("no file or meta store");
         }
         this.thumbnailer = new Thumbnailer();
