@@ -10,8 +10,8 @@ export interface IFile {
     meta: {
         [key: string]: any;
     };
-    ctime: number;
-    mtime: number;
+    ctime: Date;
+    mtime: Date;
     hidden: boolean;
 }
 export interface IListOptions {

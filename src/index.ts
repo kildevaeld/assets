@@ -186,8 +186,11 @@ export class Assets extends EventEmitter {
             tmpFile = await writeToTempFile(stream, path);
 
             let stats = await getFileStats(tmpFile);
-            let mime = getMimeType(tmpFile);
-
+            let mime = options.mime;
+            if (mime == null || mime == "") {
+               mime = getMimeType(tmpFile);
+            }
+          
             options.mime = mime;
             options.size = stats.size
         }

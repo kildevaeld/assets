@@ -11,8 +11,8 @@ export interface IFile {
     mime: string;
     size: number;
     meta: {[key: string]: any};
-    ctime: number;
-    mtime: number;
+    ctime: Date;
+    mtime: Date;
     hidden: boolean;
 }
 export interface IListOptions {

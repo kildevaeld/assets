@@ -3,6 +3,7 @@ import {IFile} from './interface';
 import {EventEmitter} from 'events';
 import * as Path from 'path';
 
+
 export function observe(target, key: string, descriptor: PropertyDescriptor) {
     let oset = descriptor.set;
     
@@ -29,16 +30,16 @@ export interface AssetOptions {
     /** The size of the file in bytes*/
     size?: number;
     /** Creation date */
-    ctime?: number;
+    ctime?: Date;
     /** Modification date */
-    mtime?: number;
+    mtime?: Date;
     /** Meta data */
     meta?: {[key: string]: any };
     /** Hidden */
     hidden?: boolean;
 }
 
-export class Asset implements IFile {
+export class Asset extends EventEmitter implements IFile {
     private _attributes: {[key:string]: any};
     
     set id (id: string) { this._attributes['id'] = id; }
@@ -68,12 +69,12 @@ export class Asset implements IFile {
     set size(size:number) {  this._attributes['size'] = size; }
     
     @observe
-    get ctime(): number { return this.get('ctime'); }
-    set ctime(time: number) { this._attributes['ctime'] = time; }
+    get ctime(): Date { return this.get('ctime'); }
+    set ctime(time: Date) { this._attributes['ctime'] = time; }
     
     @observe
-    get mtime(): number { return this.get('mtime'); }
-    set mtime(time: number) { this._attributes['mtime'] = time; }
+    get mtime(): Date { return this.get('mtime'); }
+    set mtime(time: Date) { this._attributes['mtime'] = time; }
     
     @observe
     get hidden(): boolean { return this.get('hidden'); }
@@ -87,7 +88,7 @@ export class Asset implements IFile {
         return Path.join(this.path, this.filename);
     }
     
-    get (key: string): any {
+    get<T>(key: string): any {
         return this._attributes[key];
     }
     
@@ -105,10 +106,11 @@ export class Asset implements IFile {
     } 
     
     constructor(file:AssetOptions={}) {
+        super();
         this._attributes = file;   
         if (!this._attributes['meta']) this._attributes['meta'] = {};
         
-        if (!file.ctime) file.ctime = new Date().getTime() / 1000;
+        if (!file.ctime) file.ctime = new Date();
         if (!file.mtime) file.mtime = file.ctime;
         
         if (file.hidden == null) file.hidden = false;
