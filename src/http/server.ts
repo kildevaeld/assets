@@ -200,7 +200,7 @@ export class AssetsRouter {
 
         if (req.method === 'DELETE') throw new HttpError("No id");
 
-        let page = 1, limit = 1000;
+        let page = 1, limit = 100;
         if (query.page) {
             let i = parseInt(query.page);
             if (!isNaN(i)) page = i;
