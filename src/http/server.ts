@@ -3,6 +3,8 @@ import * as Path from 'path';
 import * as querystring from 'querystring';
 import * as Debug from 'debug';
 import * as formidable from 'formidable';
+import * as URL from 'url';
+import * as Qs from 'querystring';
 
 import {Assets, AssetCreateOptions} from '../index';
 
@@ -371,9 +373,27 @@ export class AssetsRouter {
 
         let url = req.url;
 
-        url = req.headers['host'] + url +  (url.indexOf('?') == -1 ? "?" : "&") + 'page=';
+
+
+        url = req.headers['host'] + url // +  (url.indexOf('?') == -1 ? "?" : "&") + 'page=';
 
         url = "http://" + url
+        let u = URL.parse(url, true);
+
+        if (u.query) {
+            /*let query = Qs.parse(u.query);*/
+            if (u.query.page) {
+                delete u.query.page;
+            }
+
+            //u.query = Qs.stringify(query);
+            u.search = null;
+            url = URL.format(u);
+            url += "&page=";
+            console.log(url, u);
+        } else {
+            url += '?page=';
+        }
 
         res.setHeader('Link', Object.keys(links).map(function(rel){
             return '<' + url + links[rel] + '>; rel="' + rel + '"';
