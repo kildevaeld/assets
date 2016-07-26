@@ -8,12 +8,14 @@
     "declaration": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
-    "removeComments": false
+    "removeComments": false,
+    "rootDir": "src"
   },
   "exclude": [
     "node_modules"
   ],
   "files": [
+    "typings/main.d.ts",
     "src/asset.ts",
     "src/index.ts",
     "src/interface.ts",
@@ -22,10 +24,10 @@
     "src/utils.ts",
     "src/cli/index.ts",
     "src/cli/server.ts",
-    "src/filestores/file.ts",
-    "src/filestores/s3.ts",
     "src/generators/generators.ts",
     "src/generators/index.ts",
+    "src/filestores/file.ts",
+    "src/filestores/s3.ts",
     "src/http/server.ts",
     "src/metastores/file.ts"
   ]

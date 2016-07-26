@@ -1,4 +1,3 @@
-/// <reference path="../typings/main.d.ts" />
 import { EventEmitter } from 'events';
 import { Readable } from 'stream';
 import { IMetaStore, IFileStore, IListOptions, IFindOptions } from './interface';

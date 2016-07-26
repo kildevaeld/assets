@@ -1,5 +1,3 @@
-/// <reference path="../typings/main.d.ts" />
-
 import {EventEmitter} from 'events';
 import {Readable} from 'stream';
 import {getFileStore, getMetaStore} from './repository';
