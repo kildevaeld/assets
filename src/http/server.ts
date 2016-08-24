@@ -390,7 +390,7 @@ export class AssetsRouter {
             u.search = null;
             url = URL.format(u);
             url += "&page=";
-            console.log(url, u);
+            
         } else {
             url += '?page=';
         }

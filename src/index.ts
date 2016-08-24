@@ -152,7 +152,8 @@ export class Assets extends EventEmitter {
         let reader = fs.createReadStream(path);
 
         options.size = stat.size;
-        options.mime = getMimeType(path);
+        if (!options.mime)
+            options.mime = getMimeType(path);
 
         return await this.create(reader, dest, options);
 

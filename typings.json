@@ -2,5 +2,14 @@
   "name": "assets",
   "dependencies": {
     "debug": "registry:npm/debug#2.0.0+20160723033700"
+  },
+  "globalDependencies": {
+    "commander": "registry:dt/commander#2.3.0+20160317120654",
+    "cookies": "registry:dt/cookies#0.5.1+20160316171810",
+    "formidable": "registry:dt/formidable#1.0.16+20160316155526",
+    "koa": "registry:dt/koa#2.0.0+20160724024233",
+    "koa-router": "registry:dt/koa-router#7.0.0+20160812160355",
+    "mz": "registry:dt/mz#0.0.0+20160811111312",
+    "node": "registry:env/node#6.0.0+20160813135048"
   }
 }

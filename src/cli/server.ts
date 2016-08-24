@@ -1,6 +1,7 @@
 import {pick} from '../utils';
 import {Assets} from '../index';
 import {AssetsRouter} from '../http/server';
+import {App} from '../http/server2';
 import * as http from 'http';
 import * as fs from 'mz/fs';
 import * as Path from 'path';
@@ -18,7 +19,7 @@ export function serverCommand(program) {
         let options = pick(cmd, ['port', 'web', 'config']);
         
         try {
-            startServer(options);    
+            startServer2(options);    
         } catch (e) {
             console.log('Could not start server: %s', e.message);
             process.exit(-1);
@@ -33,6 +34,41 @@ export function serverCommand(program) {
       
 }
 
+function startServer2(options) {
+
+    let config = {};
+    if (options.config) {
+        let configPath = options.config; 
+        if (!Path.isAbsolute(configPath))
+            configPath = Path.resolve(options.config);
+        config = require(configPath);
+        console.log('Using config file: %s', configPath);
+    }
+
+    let assets = new Assets(config);
+
+    let app = App(assets);
+
+    var server;
+
+    const clean = () => {
+        process.stdout.write("Exiting ... ");
+        if (server) server.close();
+        process.stdout.write('done\n');
+        process.exit(0);
+    } 
+
+    
+    assets.initialize().then(() => {
+        console.log('Starting server on port %s', options.port);
+        server = app.listen(options.port);
+    }).catch( e => {
+        console.error('Error: ', e);
+        process.exit(-1);
+    });
+    
+    process.on('SIGINT', clean);
+}
 
 function startServer (options) {
     

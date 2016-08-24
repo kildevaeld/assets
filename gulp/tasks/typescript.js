@@ -39,7 +39,7 @@ gulp.task('addfiles', (done) => {
       return file.replace(process.cwd() +'/', '')
     });
 
-    tsconfig.files.unshift('typings/main.d.ts');
+    tsconfig.files.unshift('typings/index.d.ts');
 
     fs.writeFile('./tsconfig.json', JSON.stringify(tsconfig,null,2), function () {
       console.log('%s files added',tsconfig.files.length);
